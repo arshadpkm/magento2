@@ -577,16 +577,7 @@ class Product extends AbstractResource
      */
     public function load($object, $entityId, $attributes = [])
     {
-        $select = $this->_getLoadRowSelect($object, $entityId);
-        $row = $this->getConnection()->fetchRow($select);
-
-        if (is_array($row)) {
-            $object->addData($row);
-        } else {
-            $object->isObjectNew(true);
-        }
-
-        $this->loadAttributesForObject($attributes, $object);
+        $this->loadAttributesMetadata($attributes);
         $this->getEntityManager()->load($object, $entityId);
         return $this;
     }

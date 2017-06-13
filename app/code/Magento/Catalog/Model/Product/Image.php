@@ -3,6 +3,12 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
+/**
+ * Catalog product link model
+ *
+ * @author      Magento Core Team <core@magentocommerce.com>
+ */
 namespace Magento\Catalog\Model\Product;
 
 use Magento\Framework\App\Filesystem\DirectoryList;
@@ -10,12 +16,12 @@ use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Image as MagentoImage;
 
 /**
- * @method string getFile()
- * @method string getLabel()
- * @method string getPosition()
  * @SuppressWarnings(PHPMD.TooManyFields)
  * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @method string getFile()
+ * @method string getLabel()
+ * @method string getPosition()
  */
 class Image extends \Magento\Framework\Model\AbstractModel
 {
@@ -137,21 +143,29 @@ class Image extends \Magento\Framework\Model\AbstractModel
     protected $_viewFileSystem;
 
     /**
+     * Core file storage database
+     *
      * @var \Magento\MediaStorage\Helper\File\Storage\Database
      */
     protected $_coreFileStorageDatabase = null;
 
     /**
+     * Core store config
+     *
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
     protected $_scopeConfig;
 
     /**
+     * Catalog product media config
+     *
      * @var \Magento\Catalog\Model\Product\Media\Config
      */
     protected $_catalogProductMediaConfig;
 
     /**
+     * Store manager
+     *
      * @var \Magento\Store\Model\StoreManagerInterface
      */
     protected $_storeManager;
@@ -172,8 +186,6 @@ class Image extends \Magento\Framework\Model\AbstractModel
     private $imageAsset;
 
     /**
-     * Constructor
-     *
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
@@ -187,8 +199,6 @@ class Image extends \Magento\Framework\Model\AbstractModel
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb $resourceCollection
      * @param array $data
-     * @param \Magento\Catalog\Model\View\Asset\ImageFactory|null $viewAssetImageFactory
-     * @param \Magento\Catalog\Model\View\Asset\PlaceholderFactory|null $viewAssetPlaceholderFactory
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      * @SuppressWarnings(PHPMD.UnusedLocalVariable)
      */
@@ -205,9 +215,7 @@ class Image extends \Magento\Framework\Model\AbstractModel
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
-        array $data = [],
-        \Magento\Catalog\Model\View\Asset\ImageFactory $viewAssetImageFactory = null,
-        \Magento\Catalog\Model\View\Asset\PlaceholderFactory $viewAssetPlaceholderFactory = null
+        array $data = []
     ) {
         $this->_storeManager = $storeManager;
         $this->_catalogProductMediaConfig = $catalogProductMediaConfig;
@@ -218,10 +226,6 @@ class Image extends \Magento\Framework\Model\AbstractModel
         $this->_assetRepo = $assetRepo;
         $this->_viewFileSystem = $viewFileSystem;
         $this->_scopeConfig = $scopeConfig;
-        $this->viewAssetImageFactory = $viewAssetImageFactory ?: ObjectManager::getInstance()
-            ->get(\Magento\Catalog\Model\View\Asset\ImageFactory::class);
-        $this->viewAssetPlaceholderFactory = $viewAssetPlaceholderFactory ?: ObjectManager::getInstance()
-            ->get(\Magento\Catalog\Model\View\Asset\PlaceholderFactory::class);
     }
 
     /**
@@ -465,7 +469,7 @@ class Image extends \Magento\Framework\Model\AbstractModel
     {
         $this->_isBaseFilePlaceholder = false;
 
-        $this->imageAsset = $this->viewAssetImageFactory->create(
+        $this->imageAsset = $this->getViewAssetImageFactory()->create(
             [
                 'miscParams' => $this->getMiscParams(),
                 'filePath' => $file,
@@ -475,7 +479,7 @@ class Image extends \Magento\Framework\Model\AbstractModel
             || !$this->_checkMemory($this->imageAsset->getSourceFile())
         ) {
             $this->_isBaseFilePlaceholder = true;
-            $this->imageAsset = $this->viewAssetPlaceholderFactory->create(
+            $this->imageAsset = $this->getViewAssetPlaceholderFactory()->create(
                 [
                     'type' => $this->getDestinationSubdir(),
                 ]
@@ -888,6 +892,34 @@ class Image extends \Magento\Framework\Model\AbstractModel
             $image = $this->imageAsset->getPath();
         }
         return getimagesize($image);
+    }
+
+    /**
+     * @return \Magento\Catalog\Model\View\Asset\ImageFactory
+     */
+    private function getViewAssetImageFactory()
+    {
+        if ($this->viewAssetImageFactory == null) {
+            $this->viewAssetImageFactory = ObjectManager::getInstance()->get(
+                \Magento\Catalog\Model\View\Asset\ImageFactory::class
+            );
+        }
+
+        return $this->viewAssetImageFactory;
+    }
+
+    /**
+     * @return \Magento\Catalog\Model\View\Asset\PlaceholderFactory
+     */
+    private function getViewAssetPlaceholderFactory()
+    {
+        if ($this->viewAssetPlaceholderFactory == null) {
+            $this->viewAssetPlaceholderFactory = ObjectManager::getInstance()->get(
+                \Magento\Catalog\Model\View\Asset\PlaceholderFactory::class
+            );
+        }
+
+        return $this->viewAssetPlaceholderFactory;
     }
 
     /**

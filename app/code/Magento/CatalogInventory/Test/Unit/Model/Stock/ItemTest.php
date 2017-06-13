@@ -473,7 +473,7 @@ class ItemTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * We want to ensure that property $_eventPrefix used during event dispatching
+     * We wan't to ensure that property $_eventPrefix used during event dispatching
      *
      * @param $eventName
      * @param $methodName

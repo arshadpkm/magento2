@@ -10,7 +10,7 @@ use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\ObjectManager\ConfigLoader;
 use Magento\Framework\ObjectManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Magento\Framework\Indexer\IndexerInterface;
+use Magento\Indexer\Model\IndexerInterface;
 use Magento\Framework\App\ObjectManagerFactory;
 
 /**
@@ -29,33 +29,24 @@ abstract class AbstractIndexerCommand extends Command
     private $objectManager;
 
     /**
-     * @var \Magento\Indexer\Model\Indexer\CollectionFactory
-     */
-    private $collectionFactory;
-
-    /**
      * Constructor
-     *
      * @param ObjectManagerFactory $objectManagerFactory
-     * @param \Magento\Indexer\Model\Indexer\CollectionFactory|null $collectionFactory
      */
-    public function __construct(
-        ObjectManagerFactory $objectManagerFactory,
-        \Magento\Indexer\Model\Indexer\CollectionFactory $collectionFactory = null
-    ) {
+    public function __construct(ObjectManagerFactory $objectManagerFactory)
+    {
         $this->objectManagerFactory = $objectManagerFactory;
-        $this->collectionFactory = $collectionFactory;
         parent::__construct();
     }
 
     /**
-     * Get all indexers
+     * Returns all indexers
      *
      * @return IndexerInterface[]
      */
     protected function getAllIndexers()
     {
-        return $this->getCollectionFactory()->create()->getItems();
+        $collectionFactory = $this->getObjectManager()->create(\Magento\Indexer\Model\Indexer\CollectionFactory::class);
+        return $collectionFactory->create()->getItems();
     }
 
     /**
@@ -75,20 +66,5 @@ abstract class AbstractIndexerCommand extends Command
             $this->objectManager->configure($configLoader->load($area));
         }
         return $this->objectManager;
-    }
-
-    /**
-     * Get collection factory
-     *
-     * @return \Magento\Indexer\Model\Indexer\CollectionFactory
-     * @deprecated
-     */
-    private function getCollectionFactory()
-    {
-        if (null === $this->collectionFactory) {
-            $this->collectionFactory = $this->getObjectManager()
-                ->get(\Magento\Indexer\Model\Indexer\CollectionFactory::class);
-        }
-        return $this->collectionFactory;
     }
 }

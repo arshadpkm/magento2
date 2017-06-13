@@ -101,7 +101,7 @@ class ValidateTest extends \PHPUnit_Framework_TestCase
             false,
             true,
             true,
-            ['getPost', 'getParam']
+            ['getPost']
         );
         $this->response = $this->getMockForAbstractClass(
             \Magento\Framework\App\ResponseInterface::class,
@@ -169,17 +169,6 @@ class ValidateTest extends \PHPUnit_Framework_TestCase
                 '_template_' => null,
                 'address_index' => null
             ]);
-        $customerEntityId = 2;
-        $this->request->expects($this->once())
-            ->method('getParam')
-            ->with('customer')
-            ->willReturn([
-                'entity_id' => $customerEntityId
-            ]);
-
-        $this->customer->expects($this->once())
-            ->method('setId')
-            ->with($customerEntityId);
 
         $this->form->expects($this->once())->method('setInvisibleIgnored');
         $this->form->expects($this->atLeastOnce())->method('extractData')->willReturn([]);
@@ -277,49 +266,6 @@ class ValidateTest extends \PHPUnit_Framework_TestCase
         $validationResult->expects($this->once())
             ->method('getMessages')
             ->willThrowException($exception);
-
-        $this->customerAccountManagement->expects($this->once())
-            ->method('validate')
-            ->willReturn($validationResult);
-
-        $this->controller->execute();
-    }
-
-    public function testExecuteWithNewCustomerAndNoEntityId()
-    {
-        $this->request->expects($this->once())
-            ->method('getPost')
-            ->willReturn([
-                '_template_' => null,
-                'address_index' => null
-            ]);
-        $this->request->expects($this->once())
-            ->method('getParam')
-            ->with('customer')
-            ->willReturn([]);
-
-        $this->customer->expects($this->never())
-            ->method('setId');
-
-        $this->form->expects($this->once())->method('setInvisibleIgnored');
-        $this->form->expects($this->atLeastOnce())->method('extractData')->willReturn([]);
-
-        $error = $this->getMock(\Magento\Framework\Message\Error::class, [], [], '', false);
-        $this->form->expects($this->once())
-            ->method('validateData')
-            ->willReturn([$error]);
-
-        $validationResult = $this->getMockForAbstractClass(
-            \Magento\Customer\Api\Data\ValidationResultsInterface::class,
-            [],
-            '',
-            false,
-            true,
-            true
-        );
-        $validationResult->expects($this->once())
-            ->method('getMessages')
-            ->willReturn(['Error message']);
 
         $this->customerAccountManagement->expects($this->once())
             ->method('validate')

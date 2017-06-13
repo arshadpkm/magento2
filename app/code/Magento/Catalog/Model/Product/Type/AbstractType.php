@@ -723,7 +723,8 @@ abstract class AbstractType
     protected function _removeNotApplicableAttributes($product)
     {
         $entityType = $product->getResource()->getEntityType();
-        foreach ($this->_eavConfig->getEntityAttributes($entityType, $product) as $attribute) {
+        foreach ($this->_eavConfig->getEntityAttributeCodes($entityType, $product) as $attributeCode) {
+            $attribute = $this->_eavConfig->getAttribute($entityType, $attributeCode);
             $applyTo = $attribute->getApplyTo();
             if (is_array($applyTo) && count($applyTo) > 0 && !in_array($product->getTypeId(), $applyTo)) {
                 $product->unsetData($attribute->getAttributeCode());

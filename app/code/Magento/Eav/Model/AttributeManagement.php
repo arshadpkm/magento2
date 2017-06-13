@@ -1,5 +1,6 @@
 <?php
 /**
+ *
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
@@ -57,8 +58,6 @@ class AttributeManagement implements \Magento\Eav\Api\AttributeManagementInterfa
     private $attributeCollectionFactory;
 
     /**
-     * Constructor
-     *
      * @param \Magento\Eav\Api\AttributeSetRepositoryInterface $setRepository
      * @param \Magento\Eav\Model\ResourceModel\Entity\Attribute\Collection $attributeCollection
      * @param Config $eavConfig
@@ -66,7 +65,7 @@ class AttributeManagement implements \Magento\Eav\Api\AttributeManagementInterfa
      * @param \Magento\Eav\Api\AttributeGroupRepositoryInterface $groupRepository
      * @param \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository
      * @param \Magento\Eav\Model\ResourceModel\Entity\Attribute $attributeResource
-     * @param \Magento\Eav\Model\ResourceModel\Entity\Attribute\CollectionFactory|null $attributeCollectionFactory
+     * @codeCoverageIgnore
      */
     public function __construct(
         \Magento\Eav\Api\AttributeSetRepositoryInterface $setRepository,
@@ -75,8 +74,7 @@ class AttributeManagement implements \Magento\Eav\Api\AttributeManagementInterfa
         \Magento\Eav\Model\ConfigFactory $entityTypeFactory,
         \Magento\Eav\Api\AttributeGroupRepositoryInterface $groupRepository,
         \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository,
-        \Magento\Eav\Model\ResourceModel\Entity\Attribute $attributeResource,
-        \Magento\Eav\Model\ResourceModel\Entity\Attribute\CollectionFactory $attributeCollectionFactory = null
+        \Magento\Eav\Model\ResourceModel\Entity\Attribute $attributeResource
     ) {
         $this->setRepository = $setRepository;
         $this->attributeCollection = $attributeCollection;
@@ -85,8 +83,6 @@ class AttributeManagement implements \Magento\Eav\Api\AttributeManagementInterfa
         $this->groupRepository = $groupRepository;
         $this->attributeRepository = $attributeRepository;
         $this->attributeResource = $attributeResource;
-        $this->attributeCollectionFactory = $attributeCollectionFactory ?: ObjectManager::getInstance()
-            ->get(\Magento\Eav\Model\ResourceModel\Entity\Attribute\CollectionFactory::class);
     }
 
     /**
@@ -168,9 +164,26 @@ class AttributeManagement implements \Magento\Eav\Api\AttributeManagementInterfa
         if (!$attributeSet->getAttributeSetId() || $attributeSet->getEntityTypeId() != $requiredEntityTypeId) {
             throw NoSuchEntityException::singleField('attributeSetId', $attributeSetId);
         }
-        $attributeCollection = $this->attributeCollectionFactory->create();
+        /** @var \Magento\Eav\Model\ResourceModel\Entity\Attribute\Collection $attributeCollection */
+        $attributeCollection = $this->getCollectionFactory()->create();
         $attributeCollection->setAttributeSetFilter($attributeSet->getAttributeSetId())->load();
 
         return $attributeCollection->getItems();
+    }
+
+    /**
+     * Retrieve collection factory
+     *
+     * @deprecated
+     * @return \Magento\Eav\Model\ResourceModel\Entity\Attribute\CollectionFactory
+     */
+    private function getCollectionFactory()
+    {
+        if ($this->attributeCollectionFactory === null) {
+            $this->attributeCollectionFactory = ObjectManager::getInstance()->create(
+                \Magento\Eav\Model\ResourceModel\Entity\Attribute\CollectionFactory::class
+            );
+        }
+        return $this->attributeCollectionFactory;
     }
 }

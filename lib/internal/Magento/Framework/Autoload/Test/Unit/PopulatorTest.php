@@ -31,14 +31,20 @@ class PopulatorTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $mockAutoloader->expects($this->once())
+        $mockAutoloader->expects($this->at(0))
             ->method('addPsr4')
             ->with(
                 'Magento\\',
                 [DirectoryList::GENERATED_CODE . '/Magento/'],
                 true
             );
-        $mockAutoloader->expects($this->once())
+        $mockAutoloader->expects($this->at(1))
+            ->method('addPsr0')
+            ->with('Cm_', DirectoryList::LIB_INTERNAL, true);
+        $mockAutoloader->expects($this->at(2))
+            ->method('addPsr0')
+            ->with('Credis_', DirectoryList::LIB_INTERNAL, true);
+        $mockAutoloader->expects($this->at(3))
             ->method('addPsr0')
             ->with('', [DirectoryList::GENERATED_CODE]);
 

@@ -21,6 +21,8 @@ use Magento\Quote\Model\QuoteRepository\SaveHandler;
 use Magento\Quote\Model\QuoteRepository\LoadHandler;
 
 /**
+ * Class QuoteRepository
+ *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class QuoteRepository implements \Magento\Quote\Api\CartRepositoryInterface
@@ -47,7 +49,6 @@ class QuoteRepository implements \Magento\Quote\Api\CartRepositoryInterface
 
     /**
      * @var \Magento\Quote\Model\ResourceModel\Quote\Collection
-     * @deprecated
      */
     protected $quoteCollection;
 
@@ -71,26 +72,16 @@ class QuoteRepository implements \Magento\Quote\Api\CartRepositoryInterface
      */
     private $loadHandler;
 
-    /**
-     * @var CollectionProcessorInterface
-     */
+    /** @var  CollectionProcessorInterface */
     private $collectionProcessor;
 
     /**
-     * @var \Magento\Quote\Model\ResourceModel\Quote\CollectionFactory
-     */
-    private $quoteCollectionFactory;
-
-    /**
-     * Constructor
-     *
      * @param QuoteFactory $quoteFactory
      * @param StoreManagerInterface $storeManager
      * @param \Magento\Quote\Model\ResourceModel\Quote\Collection $quoteCollection
      * @param \Magento\Quote\Api\Data\CartSearchResultsInterfaceFactory $searchResultsDataFactory
      * @param JoinProcessorInterface $extensionAttributesJoinProcessor
-     * @param CollectionProcessorInterface|null $collectionProcessor
-     * @param \Magento\Quote\Model\ResourceModel\Quote\CollectionFactory|null $quoteCollectionFactory
+     * @param CollectionProcessorInterface $collectionProcessor
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function __construct(
@@ -99,17 +90,13 @@ class QuoteRepository implements \Magento\Quote\Api\CartRepositoryInterface
         \Magento\Quote\Model\ResourceModel\Quote\Collection $quoteCollection,
         \Magento\Quote\Api\Data\CartSearchResultsInterfaceFactory $searchResultsDataFactory,
         JoinProcessorInterface $extensionAttributesJoinProcessor,
-        CollectionProcessorInterface $collectionProcessor = null,
-        \Magento\Quote\Model\ResourceModel\Quote\CollectionFactory $quoteCollectionFactory = null
+        CollectionProcessorInterface $collectionProcessor = null
     ) {
         $this->quoteFactory = $quoteFactory;
         $this->storeManager = $storeManager;
         $this->searchResultsDataFactory = $searchResultsDataFactory;
         $this->extensionAttributesJoinProcessor = $extensionAttributesJoinProcessor;
-        $this->collectionProcessor = $collectionProcessor ?: \Magento\Framework\App\ObjectManager::getInstance()
-            ->get(\Magento\Framework\Api\SearchCriteria\CollectionProcessor::class);
-        $this->quoteCollectionFactory = $quoteCollectionFactory ?: \Magento\Framework\App\ObjectManager::getInstance()
-            ->get(\Magento\Quote\Model\ResourceModel\Quote\CollectionFactory::class);
+        $this->collectionProcessor = $collectionProcessor ?: $this->getCollectionProcessor();
     }
 
     /**
@@ -220,11 +207,25 @@ class QuoteRepository implements \Magento\Quote\Api\CartRepositoryInterface
     }
 
     /**
+     * Get quote collection
+     * Temporary method to support release backward compatibility.
+     *
+     * @deprecated
+     * @return QuoteCollection
+     */
+    protected function getQuoteCollection()
+    {
+        /** @var \Magento\Quote\Model\ResourceModel\Quote\CollectionFactory $collectionFactory */
+        $collectionFactory = ObjectManager::getInstance()->get(QuoteCollectionFactory::class);
+        return $collectionFactory->create();
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getList(\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria)
     {
-        $this->quoteCollection = $this->quoteCollectionFactory->create();
+        $this->quoteCollection = $this->getQuoteCollection();
         /** @var \Magento\Quote\Api\Data\CartSearchResultsInterface $searchData */
         $searchData = $this->searchResultsDataFactory->create();
         $searchData->setSearchCriteria($searchCriteria);
@@ -286,5 +287,21 @@ class QuoteRepository implements \Magento\Quote\Api\CartRepositoryInterface
             $this->loadHandler = ObjectManager::getInstance()->get(LoadHandler::class);
         }
         return $this->loadHandler;
+    }
+
+    /**
+     * Retrieve collection processor
+     *
+     * @deprecated
+     * @return CollectionProcessorInterface
+     */
+    private function getCollectionProcessor()
+    {
+        if (!$this->collectionProcessor) {
+            $this->collectionProcessor = \Magento\Framework\App\ObjectManager::getInstance()->get(
+                \Magento\Framework\Api\SearchCriteria\CollectionProcessor::class
+            );
+        }
+        return $this->collectionProcessor;
     }
 }

@@ -41,26 +41,6 @@ class CartPriceRulesFixture extends Fixture
     protected $cartRulesAdvancedType = false;
 
     /**
-     * @var \Magento\SalesRule\Model\RuleFactory
-     */
-    private $ruleFactory;
-
-    /**
-     * Constructor
-     *
-     * @param FixtureModel $fixtureModel
-     * @param \Magento\SalesRule\Model\RuleFactory|null $ruleFactory
-     */
-    public function __construct(
-        FixtureModel $fixtureModel,
-        \Magento\SalesRule\Model\RuleFactory $ruleFactory = null
-    ) {
-        parent::__construct($fixtureModel);
-        $this->ruleFactory = $ruleFactory ?: $this->fixtureModel->getObjectManager()
-            ->get(\Magento\SalesRule\Model\RuleFactory::class);
-    }
-
-    /**
      * {@inheritdoc}
      * @SuppressWarnings(PHPMD)
      */
@@ -82,6 +62,8 @@ class CartPriceRulesFixture extends Fixture
         $storeManager = $this->fixtureModel->getObjectManager()->create(\Magento\Store\Model\StoreManager::class);
         /** @var $category \Magento\Catalog\Model\Category */
         $category = $this->fixtureModel->getObjectManager()->get(\Magento\Catalog\Model\Category::class);
+        /** @var $model  \Magento\SalesRule\Model\RuleFactory */
+        $modelFactory = $this->fixtureModel->getObjectManager()->get(\Magento\SalesRule\Model\RuleFactory::class);
 
         //Get all websites
         $categoriesArray = [];
@@ -108,9 +90,9 @@ class CartPriceRulesFixture extends Fixture
         $categoriesArray = array_values($categoriesArray);
 
         if ($this->cartRulesAdvancedType == false) {
-            $this->generateRules($this->ruleFactory, $categoriesArray);
+            $this->generateRules($modelFactory, $categoriesArray);
         } else {
-            $this->generateAdvancedRules($this->ruleFactory, $categoriesArray);
+            $this->generateAdvancedRules($modelFactory, $categoriesArray);
         }
     }
 
@@ -160,11 +142,11 @@ class CartPriceRulesFixture extends Fixture
     }
 
     /**
-     * @param \Magento\SalesRule\Model\RuleFactory $ruleFactory
+     * @param \Magento\SalesRule\Model\RuleFactory $modelFactory
      * @param array $categoriesArray
      * @return void
      */
-    public function generateRules($ruleFactory, $categoriesArray)
+    public function generateRules($modelFactory, $categoriesArray)
     {
         for ($i = 0; $i < $this->cartPriceRulesCount; $i++) {
             $ruleName = sprintf('Cart Price Rule %1$d', $i);
@@ -236,7 +218,7 @@ class CartPriceRulesFixture extends Fixture
             }
             unset($data['rule']);
 
-            $model = $ruleFactory->create();
+            $model = $modelFactory->create();
             $model->loadPost($data);
             $useAutoGeneration = (int)!empty($data['use_auto_generation']);
             $model->setUseAutoGeneration($useAutoGeneration);
@@ -345,11 +327,11 @@ class CartPriceRulesFixture extends Fixture
     }
 
     /**
-     * @param \Magento\SalesRule\Model\RuleFactory $ruleFactory
+     * @param \Magento\SalesRule\Model\RuleFactory $modelFactory
      * @param array $categoriesArray
      * @return void
      */
-    public function generateAdvancedRules($ruleFactory, $categoriesArray)
+    public function generateAdvancedRules($modelFactory, $categoriesArray)
     {
         $j = 0;
         for ($i = 0; $i < $this->cartPriceRulesCount; $i++) {
@@ -427,7 +409,7 @@ class CartPriceRulesFixture extends Fixture
             }
             unset($data['rule']);
 
-            $model = $ruleFactory->create();
+            $model = $modelFactory->create();
             $model->loadPost($data);
             $useAutoGeneration = (int)!empty($data['use_auto_generation']);
             $model->setUseAutoGeneration($useAutoGeneration);

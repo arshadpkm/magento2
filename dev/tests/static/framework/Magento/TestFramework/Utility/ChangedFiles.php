@@ -7,6 +7,7 @@
 namespace Magento\TestFramework\Utility;
 
 use Magento\Framework\App\Utility\Files;
+use Magento\TestFramework\Utility\File\RegexIteratorFactory;
 
 /**
  * A helper to gather various changed files
@@ -24,12 +25,11 @@ class ChangedFiles
      * Returns array of PHP-files, that use or declare Magento application classes and Magento libs
      *
      * @param string $changedFilesList
-     * @param int $fileTypes
      * @return array
      */
-    public static function getPhpFiles($changedFilesList, $fileTypes = 0)
+    public static function getPhpFiles($changedFilesList)
     {
-        $fileUtilities = Files::init();
+        $fileUtilities = new File(Files::init(), new RegexIteratorFactory());
         if (isset($_ENV['INCREMENTAL_BUILD'])) {
             $phpFiles = [];
             foreach (glob($changedFilesList) as $listFile) {
@@ -43,10 +43,10 @@ class ChangedFiles
             );
             if (!empty($phpFiles)) {
                 $phpFiles = Files::composeDataSets($phpFiles);
-                $phpFiles = array_intersect_key($phpFiles, $fileUtilities->getPhpFiles($fileTypes));
+                $phpFiles = array_intersect_key($phpFiles, $fileUtilities->getPhpFiles());
             }
         } else {
-            $phpFiles = $fileUtilities->getPhpFiles($fileTypes);
+            $phpFiles = $fileUtilities->getPhpFiles();
         }
 
         return $phpFiles;

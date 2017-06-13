@@ -104,22 +104,25 @@ class RuntimeConfigSourceTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->data = [
-            'groups' => [
-                '1' => [
+            'group' => [
+                'code' => 'myGroup',
+                'data' => [
                     'name' => 'My Group',
-                    'group_id' => 1
-                ],
-            ],
-            'stores' => [
-                'myStore' => [
-                    'name' => 'My Store',
-                    'code' => 'myStore'
+                    'group_id' => $this->data['group']['code']
                 ]
             ],
-            'websites' => [
-                'myWebsite' => [
+            'website' => [
+                'code' => 'myWebsite',
+                'data' => [
                     'name' => 'My Website',
-                    'code' => 'myWebsite'
+                    'website_code' => $this->data['website']['code']
+                ]
+            ],
+            'store' => [
+                'code' => 'myStore',
+                'data' => [
+                    'name' => 'My Store',
+                    'store_code' => $this->data['store']['code']
                 ]
             ],
         ];
@@ -206,16 +209,26 @@ class RuntimeConfigSourceTest extends \PHPUnit_Framework_TestCase
     {
         switch ($this->getScope($path)) {
             case 'websites':
-                $result = ['websites' => $this->data['websites']];
+                $result = $this->data['website']['data'];
                 break;
             case 'groups':
-                $result = ['groups' => $this->data['groups']];
+                $result = $this->data['group']['data'];
                 break;
             case 'stores':
-                $result = ['stores' => $this->data['stores']];
+                $result = $this->data['store']['data'];
                 break;
             default:
-                $result = $this->data;
+                $result = [
+                    'websites' => [
+                        $this->data['website']['code'] => $this->data['website']['data']
+                    ],
+                    'groups' => [
+                        $this->data['group']['code'] => $this->data['group']['data']
+                    ],
+                    'stores' => [
+                        $this->data['store']['code'] => $this->data['store']['data']
+                    ],
+                ];
                 break;
         }
         return $result;
@@ -231,7 +244,7 @@ class RuntimeConfigSourceTest extends \PHPUnit_Framework_TestCase
                     ->willReturn($this->store);
                 $this->store->expects($this->once())
                     ->method('load')
-                    ->with('myStore', 'code')
+                    ->with($this->data['store']['code'], 'code')
                     ->willReturnSelf();
             } else {
                 $this->storeCollectionFactory->expects($this->once())
@@ -246,11 +259,11 @@ class RuntimeConfigSourceTest extends \PHPUnit_Framework_TestCase
                     ->willReturn(new \ArrayIterator([$this->store]));
                 $this->store->expects($this->once())
                     ->method('getCode')
-                    ->willReturn('myStore');
+                    ->willReturn($this->data['store']['code']);
             }
             $this->store->expects($this->once())
                 ->method('getData')
-                ->willReturn($this->data['stores']['myStore']);
+                ->willReturn($this->data['store']['data']);
         }
     }
 
@@ -264,7 +277,7 @@ class RuntimeConfigSourceTest extends \PHPUnit_Framework_TestCase
                     ->willReturn($this->group);
                 $this->group->expects($this->once())
                     ->method('load')
-                    ->with($this->data['groups']['1']['group_id'])
+                    ->with($this->data['group']['code'])
                     ->willReturnSelf();
             } else {
                 $this->groupCollectionFactory->expects($this->once())
@@ -279,11 +292,11 @@ class RuntimeConfigSourceTest extends \PHPUnit_Framework_TestCase
                     ->willReturn(new \ArrayIterator([$this->group]));
                 $this->group->expects($this->once())
                     ->method('getId')
-                    ->willReturn($this->data['groups']['1']['group_id']);
+                    ->willReturn($this->data['group']['code']);
             }
             $this->group->expects($this->once())
                 ->method('getData')
-                ->willReturn($this->data['groups']['1']);
+                ->willReturn($this->data['group']['data']);
         }
     }
 
@@ -297,7 +310,7 @@ class RuntimeConfigSourceTest extends \PHPUnit_Framework_TestCase
                     ->willReturn($this->website);
                 $this->website->expects($this->once())
                     ->method('load')
-                    ->with($this->data['websites']['myWebsite']['code'])
+                    ->with($this->data['website']['code'])
                     ->willReturnSelf();
             } else {
                 $this->websiteCollectionFactory->expects($this->once())
@@ -312,11 +325,11 @@ class RuntimeConfigSourceTest extends \PHPUnit_Framework_TestCase
                     ->willReturn(new \ArrayIterator([$this->website]));
                 $this->website->expects($this->once())
                     ->method('getCode')
-                    ->willReturn('myWebsite');
+                    ->willReturn($this->data['website']['code']);
             }
             $this->website->expects($this->once())
                 ->method('getData')
-                ->willReturn($this->data['websites']['myWebsite']);
+                ->willReturn($this->data['website']['data']);
         }
     }
 
@@ -337,7 +350,7 @@ class RuntimeConfigSourceTest extends \PHPUnit_Framework_TestCase
     {
         return [
             ['websites/myWebsite'],
-            ['groups/1'],
+            ['groups/myGroup'],
             ['stores/myStore'],
             ['default']
         ];

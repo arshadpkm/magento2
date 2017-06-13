@@ -4,6 +4,8 @@
  * See COPYING.txt for license details.
  */
 
+// @codingStandardsIgnoreFile
+
 /**
  * Test class for \Magento\AdminNotification\Block\ToolbarEntry
  */
@@ -51,8 +53,7 @@ class ToolbarEntryTest extends \PHPUnit_Framework_TestCase
 
         // 1. Create mocks
         $notificationList = $this->getMockBuilder(
-            \Magento\AdminNotification\Model\ResourceModel\Inbox\Collection\Unread::class
-        )
+            \Magento\AdminNotification\Model\ResourceModel\Inbox\Collection\Unread::class)
             ->disableOriginalConstructor()
             ->getMock();
 

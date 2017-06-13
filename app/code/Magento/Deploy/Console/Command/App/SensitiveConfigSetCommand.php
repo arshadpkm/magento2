@@ -6,10 +6,10 @@
 namespace Magento\Deploy\Console\Command\App;
 
 use Magento\Config\App\Config\Type\System;
-use Magento\Config\Console\Command\EmulatedAdminhtmlAreaProcessor;
 use Magento\Deploy\Console\Command\App\SensitiveConfigSet\SensitiveConfigSetFacade;
 use Magento\Deploy\Model\DeploymentConfig\ChangeDetector;
 use Magento\Deploy\Model\DeploymentConfig\Hash;
+use Magento\Deploy\Model\DeploymentConfig\Validator;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Console\Cli;
 use Symfony\Component\Console\Command\Command;
@@ -70,28 +70,18 @@ class SensitiveConfigSetCommand extends Command
     private $facade;
 
     /**
-     * Emulator adminhtml area for CLI command.
-     *
-     * @var EmulatedAdminhtmlAreaProcessor
-     */
-    private $emulatedAreaProcessor;
-
-    /**
      * @param SensitiveConfigSetFacade $facade The processor facade
      * @param ChangeDetector $changeDetector The config change detector
      * @param Hash $hash The hash manager
-     * @param EmulatedAdminhtmlAreaProcessor $emulatedAreaProcessor Emulator adminhtml area for CLI command
      */
     public function __construct(
         SensitiveConfigSetFacade $facade,
         ChangeDetector $changeDetector,
-        Hash $hash,
-        EmulatedAdminhtmlAreaProcessor $emulatedAreaProcessor
+        Hash $hash
     ) {
         $this->facade = $facade;
         $this->changeDetector = $changeDetector;
         $this->hash = $hash;
-        $this->emulatedAreaProcessor = $emulatedAreaProcessor;
 
         parent::__construct();
     }
@@ -153,9 +143,7 @@ class SensitiveConfigSetCommand extends Command
         }
 
         try {
-            $this->emulatedAreaProcessor->process(function () use ($input, $output) {
-                $this->facade->process($input, $output);
-            });
+            $this->facade->process($input, $output);
             $this->hash->regenerate(System::CONFIG_TYPE);
 
             return Cli::RETURN_SUCCESS;

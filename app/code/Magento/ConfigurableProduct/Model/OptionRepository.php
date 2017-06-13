@@ -279,7 +279,7 @@ class OptionRepository implements \Magento\ConfigurableProduct\Api\OptionReposit
             $inputException->addError(__('Option values are not specified.'));
         } else {
             foreach ($option->getValues() as $optionValue) {
-                if (null === $optionValue->getValueIndex()) {
+                if (!$optionValue->getValueIndex()) {
                     $inputException->addError(__('Value index is not specified for an option.'));
                 }
             }

@@ -69,7 +69,8 @@ class ConfigurableProductManagementTest extends \Magento\TestFramework\TestCase\
                         'value' => $attributeOptionValue
                     ]
                 ],
-                'tier_prices' => []
+                'tier_prices' => [],
+                'extension_attributes' => []
             ]
         ];
         ksort($expectedItems);

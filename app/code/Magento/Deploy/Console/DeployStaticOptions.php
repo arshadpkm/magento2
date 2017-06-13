@@ -127,11 +127,6 @@ class DeployStaticOptions
     const LANGUAGES_ARGUMENT = 'languages';
 
     /**
-     * Static content version
-     */
-    const CONTENT_VERSION = 'content-version';
-
-    /**
      * Deploy static command options list
      *
      * @return array
@@ -216,14 +211,7 @@ class DeployStaticOptions
                 null,
                 InputOption::VALUE_NONE,
                 'Create symlinks for the files of those locales, which are passed for deployment, '
-                . 'but have no customizations.'
-            ),
-            new InputOption(
-                self::CONTENT_VERSION,
-                null,
-                InputArgument::OPTIONAL,
-                'Custom version of static content can be used if running deployment on multiple nodes '
-                . 'to ensure that static content version is identical and caching works properly.'
+                . 'but have no customizations'
             ),
             new InputArgument(
                 self::LANGUAGES_ARGUMENT,

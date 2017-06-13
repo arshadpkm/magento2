@@ -93,7 +93,6 @@ class CreateTest extends \PHPUnit_Framework_TestCase
         $rate->setCode('freeshipping_freeshipping');
 
         $this->_model->getQuote()->getShippingAddress()->addShippingRate($rate);
-        $this->_model->getQuote()->getShippingAddress()->setCountryId('EE');
         $this->_model->setShippingAsBilling(0);
         $this->_model->setPaymentData(['method' => 'checkmo']);
 

@@ -61,6 +61,10 @@ class AbstractIndexerCommandCommonSetup extends \PHPUnit_Framework_TestCase
             false
         );
 
+        $this->objectManager->expects($this->any())
+            ->method('get')
+            ->will($this->returnValueMap($this->getObjectManagerReturnValueMap()));
+
         $this->collectionFactory = $this->getMockBuilder(\Magento\Indexer\Model\Indexer\CollectionFactory::class)
             ->disableOriginalConstructor()
             ->setMethods(['create'])
@@ -70,19 +74,13 @@ class AbstractIndexerCommandCommonSetup extends \PHPUnit_Framework_TestCase
             ->setMethods(['create'])
             ->getMock();
 
-        $this->objectManager->expects($this->any())
-            ->method('get')
-            ->will(
-                $this->returnValueMap(
-                    array_merge(
-                        $this->getObjectManagerReturnValueMap(),
-                        [
-                            [\Magento\Indexer\Model\Indexer\CollectionFactory::class, $this->collectionFactory],
-                            [\Magento\Indexer\Model\IndexerFactory::class, $this->indexerFactory],
-                        ]
-                    )
-                )
-            );
+        $this->objectManager
+            ->expects($this->any())
+            ->method('create')
+            ->will($this->returnValueMap([
+                [\Magento\Indexer\Model\Indexer\CollectionFactory::class, [], $this->collectionFactory],
+                [\Magento\Indexer\Model\IndexerFactory::class, [], $this->indexerFactory],
+            ]));
     }
 
     /**

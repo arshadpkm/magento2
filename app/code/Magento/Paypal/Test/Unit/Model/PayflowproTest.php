@@ -87,7 +87,6 @@ class PayflowproTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $clientFactory = $this->getMockBuilder(ZendClientFactory::class)
-            ->disableOriginalConstructor()
             ->getMock();
         $clientFactory->method('create')->will($this->returnValue($client));
 

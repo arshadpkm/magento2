@@ -13,7 +13,6 @@ define([
     '../model/address-converter',
     '../action/select-shipping-address',
     './postcode-validator',
-    './default-validator',
     'mage/translate',
     'uiRegistry',
     'Magento_Checkout/js/model/shipping-address/form-popup-state',
@@ -25,7 +24,6 @@ define([
     addressConverter,
     selectShippingAddress,
     postcodeValidator,
-    defaultValidator,
     $t,
     uiRegistry,
     formPopUpState
@@ -37,8 +35,6 @@ define([
         observedElements = [],
         postcodeElement = null,
         postcodeElementName = 'postcode';
-
-    validators.push(defaultValidator);
 
     return {
         validateAddressTimeout: 0,

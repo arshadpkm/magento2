@@ -7,12 +7,9 @@ namespace Magento\Store\App\Config\Source;
 
 use Magento\Framework\App\Config\ConfigSourceInterface;
 use Magento\Framework\App\DeploymentConfig;
-use Magento\Store\Model\Group;
 use Magento\Store\Model\ResourceModel\Website\CollectionFactory as WebsiteCollectionFactory;
 use Magento\Store\Model\ResourceModel\Group\CollectionFactory as GroupCollectionFactory;
 use Magento\Store\Model\ResourceModel\Store\CollectionFactory as StoreCollectionFactory;
-use Magento\Store\Model\Store;
-use Magento\Store\Model\Website;
 use Magento\Store\Model\WebsiteFactory;
 use Magento\Store\Model\GroupFactory;
 use Magento\Store\Model\StoreFactory;
@@ -103,13 +100,13 @@ class RuntimeConfigSource implements ConfigSourceInterface
         if ($this->canUseDatabase()) {
             switch ($scopePool) {
                 case 'websites':
-                    $data['websites'] = $this->getWebsitesData($scopeCode);
+                    $data = $this->getWebsitesData($scopeCode);
                     break;
                 case 'groups':
-                    $data['groups'] = $this->getGroupsData($scopeCode);
+                    $data = $this->getGroupsData($scopeCode);
                     break;
                 case 'stores':
-                    $data['stores'] = $this->getStoresData($scopeCode);
+                    $data = $this->getStoresData($scopeCode);
                     break;
                 default:
                     $data = [
@@ -130,15 +127,14 @@ class RuntimeConfigSource implements ConfigSourceInterface
      */
     private function getWebsitesData($code = null)
     {
-        if ($code !== null) {
+        if ($code) {
             $website = $this->websiteFactory->create();
             $website->load($code);
-            $data[$code] = $website->getData();
+            $data = $website->getData();
         } else {
             $collection = $this->websiteCollectionFactory->create();
             $collection->setLoadDefault(true);
             $data = [];
-            /** @var Website $website */
             foreach ($collection as $website) {
                 $data[$website->getCode()] = $website->getData();
             }
@@ -152,15 +148,14 @@ class RuntimeConfigSource implements ConfigSourceInterface
      */
     private function getGroupsData($id = null)
     {
-        if ($id !== null) {
+        if ($id) {
             $group = $this->groupFactory->create();
             $group->load($id);
-            $data[$id] = $group->getData();
+            $data = $group->getData();
         } else {
             $collection = $this->groupCollectionFactory->create();
             $collection->setLoadDefault(true);
             $data = [];
-            /** @var Group $group */
             foreach ($collection as $group) {
                 $data[$group->getId()] = $group->getData();
             }
@@ -174,21 +169,14 @@ class RuntimeConfigSource implements ConfigSourceInterface
      */
     private function getStoresData($code = null)
     {
-        if ($code !== null) {
+        if ($code) {
             $store = $this->storeFactory->create();
-
-            if (is_numeric($code)) {
-                $store->load($code);
-            } else {
-                $store->load($code, 'code');
-            }
-
-            $data[$code] = $store->getData();
+            $store->load($code, 'code');
+            $data = $store->getData();
         } else {
             $collection = $this->storeCollectionFactory->create();
             $collection->setLoadDefault(true);
             $data = [];
-            /** @var Store $store */
             foreach ($collection as $store) {
                 $data[$store->getCode()] = $store->getData();
             }

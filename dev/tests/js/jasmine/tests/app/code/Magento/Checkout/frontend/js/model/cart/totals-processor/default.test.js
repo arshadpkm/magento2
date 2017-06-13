@@ -32,13 +32,6 @@ define([
             regionId: 'California',
             postcode: 90210
         },
-        data = {
-            totals: result,
-            address: address,
-            cartVersion: 1,
-            shippingMethodCode: null,
-            shippingCarrierCode: null
-        },
         mocks = {
             'Magento_Checkout/js/model/resource-url-manager': {
                 getUrlForTotalsEstimationForNewAddress: jasmine.createSpy().and.returnValue(
@@ -49,7 +42,8 @@ define([
                 shippingMethod: ko.observable({
                     'method_code': 'flatrate',
                     'carrier_code': 'flatrate'
-                }),
+                }
+                ),
                 setTotals: jasmine.createSpy()
             },
             'mage/storage': {
@@ -71,6 +65,13 @@ define([
                 },
                 set: jasmine.createSpy()
             }
+        },
+        data = {
+            totals: result,
+            address: address,
+            cartVersion: 1,
+            shippingMethodCode: 'flatrate',
+            shippingCarrierCode: 'flatrate'
         },
         defaultProcessor;
 
@@ -111,9 +112,6 @@ define([
             );
             spyOn(mocks['Magento_Checkout/js/model/cart/cache'], 'get');
             spyOn(mocks['mage/storage'], 'post').and.callFake(function () {
-                data.shippingMethodCode = mocks['Magento_Checkout/js/model/quote'].shippingMethod()['method_code'];
-                data.shippingCarrierCode = mocks['Magento_Checkout/js/model/quote'].shippingMethod()['carrier_code'];
-
                 return new $.Deferred().resolve(result);
             });
             expect(defaultProcessor.estimateTotals(address)).toBeUndefined();

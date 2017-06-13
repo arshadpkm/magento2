@@ -288,7 +288,6 @@ class TypeProcessor
      *     'type' => <string>$type,
      *     'isRequired' => $isRequired,
      *     'description' => $description
-     *     'parameterCount' => $numberOfRequiredParameters
      * )</pre>
      * @throws \InvalidArgumentException
      */
@@ -310,13 +309,23 @@ class TypeProcessor
         }
         /** @var \Zend\Code\Reflection\DocBlock\Tag\ReturnTag $returnAnnotation */
         $returnAnnotation = current($returnAnnotations);
-        $types = $returnAnnotation->getTypes();
-        $returnType = current($types);
-        $nullable = in_array('null', $types);
+        $returnType = $returnAnnotation->getType();
+        /*
+         * Adding this code as a workaround since \Zend\Code\Reflection\DocBlock\Tag\ReturnTag::initialize does not
+         * detect and return correct type for array of objects in annotation.
+         * eg @return \Magento\Webapi\Service\Entity\SimpleData[] is returned with type
+         * \Magento\Webapi\Service\Entity\SimpleData instead of \Magento\Webapi\Service\Entity\SimpleData[]
+         */
+        $escapedReturnType = str_replace('[]', '\[\]', $returnType);
+        $escapedReturnType = str_replace('\\', '\\\\', $escapedReturnType);
 
+        if (preg_match("/.*\\@return\\s+({$escapedReturnType}).*/i", $methodDocBlock->getContents(), $matches)) {
+            $returnType = $matches[1];
+        }
+        $isNotRequired = (bool)preg_match("/.*\@return\s+\S+\|null.*/i", $methodDocBlock->getContents(), $matches);
         return [
             'type' => $returnType,
-            'isRequired' => !$nullable,
+            'isRequired' => !$isNotRequired,
             'description' => $returnAnnotation->getDescription(),
             'parameterCount' => $methodReflection->getNumberOfRequiredParameters()
         ];

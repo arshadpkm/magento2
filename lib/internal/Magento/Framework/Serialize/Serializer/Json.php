@@ -8,7 +8,7 @@ namespace Magento\Framework\Serialize\Serializer;
 use Magento\Framework\Serialize\SerializerInterface;
 
 /**
- * Serialize data to JSON, unserialize JSON encoded data
+ * Class for serializing data to json string and unserializing json string to data
  *
  * @api
  */
@@ -19,11 +19,7 @@ class Json implements SerializerInterface
      */
     public function serialize($data)
     {
-        $result = json_encode($data);
-        if (false === $result) {
-            throw new \InvalidArgumentException('Unable to serialize value.');
-        }
-        return $result;
+        return json_encode($data);
     }
 
     /**
@@ -31,10 +27,6 @@ class Json implements SerializerInterface
      */
     public function unserialize($string)
     {
-        $result = json_decode($string, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \InvalidArgumentException('Unable to unserialize value.');
-        }
-        return $result;
+        return json_decode($string, true);
     }
 }

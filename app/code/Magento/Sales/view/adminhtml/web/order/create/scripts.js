@@ -1248,8 +1248,7 @@ define([
                 params.store_id = this.storeId;
             }
 
-            var currentCustomerGroupId = $(parameters.groupIdHtmlId)
-                ? $(parameters.groupIdHtmlId).value : '';
+            var currentCustomerGroupId = $(parameters.groupIdHtmlId).value;
 
             new Ajax.Request(parameters.validateUrl, {
                 parameters: params,

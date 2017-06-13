@@ -156,14 +156,14 @@ class Tablerate extends \Magento\Shipping\Model\Carrier\AbstractCarrier implemen
         $request->setPackageQty($oldQty);
 
         if (!empty($rate) && $rate['price'] >= 0) {
-            if ($request->getPackageQty() == $freeQty) {
+            if ($request->getFreeShipping() === true || $request->getPackageQty() == $freeQty) {
                 $shippingPrice = 0;
             } else {
                 $shippingPrice = $this->getFinalPriceWithHandlingFee($rate['price']);
             }
             $method = $this->createShippingMethod($shippingPrice, $rate['cost']);
             $result->append($method);
-        } elseif ($request->getPackageQty() == $freeQty) {
+        } elseif (empty($rate) && $request->getFreeShipping() === true || $request->getPackageQty() == $freeQty) {
 
             /**
              * Promotion rule was applied for the whole cart.

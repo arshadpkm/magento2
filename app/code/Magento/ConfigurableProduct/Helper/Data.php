@@ -76,11 +76,23 @@ class Data
     public function getOptions($currentProduct, $allowedProducts)
     {
         $options = [];
-        $allowAttributes = $this->getAllowAttributes($currentProduct);
-
         foreach ($allowedProducts as $product) {
             $productId = $product->getId();
-            foreach ($allowAttributes as $attribute) {
+            $images = $this->getGalleryImages($product);
+            if ($images) {
+                foreach ($images as $image) {
+                    $options['images'][$productId][] =
+                        [
+                            'thumb' => $image->getData('small_image_url'),
+                            'img' => $image->getData('medium_image_url'),
+                            'full' => $image->getData('large_image_url'),
+                            'caption' => $image->getLabel(),
+                            'position' => $image->getPosition(),
+                            'isMain' => $image->getFile() == $product->getImage(),
+                        ];
+                }
+            }
+            foreach ($this->getAllowAttributes($currentProduct) as $attribute) {
                 $productAttribute = $attribute->getProductAttribute();
                 $productAttributeId = $productAttribute->getId();
                 $attributeValue = $product->getData($productAttribute->getAttributeCode());

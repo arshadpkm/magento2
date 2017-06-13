@@ -52,7 +52,7 @@
         <observer name="persistent" instance="Magento\Persistent\Observer\SetLoadPersistentQuoteObserver" />
     </event>
     <event name="customer_register_success">
-        <observer name="persistent" instance="Magento\Persistent\Observer\RemovePersistentCookieOnRegisterObserver" />
+        <observer name="persistent" instance="Magento\Persistent\Observer\RemovePersistentCookieObserver" />
     </event>
     <event name="render_block">
         <observer name="persistent" instance="Magento\Persistent\Observer\ApplyBlockPersistentDataObserver" />
@@ -62,8 +62,5 @@
     </event>
     <event name="persistent_session_expired">
         <observer name="refresh_customer_data" instance="Magento\Persistent\Observer\RefreshCustomerData" />
-    </event>
-    <event name="checkout_cart_save_after">
-        <observer name="persistent" instance="Magento\Persistent\Observer\RemoveGuestPersistenceOnEmptyCartObserver" />
     </event>
 </config>

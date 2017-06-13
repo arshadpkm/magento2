@@ -41,6 +41,7 @@ class Listing extends \Magento\Ui\DataProvider\AbstractDataProvider
         parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
         $this->request = $request;
         $this->collection = $collectionFactory->create();
+        $this->collection->setExcludeSetFilter((int)$this->request->getParam('template_id', 0));
     }
 
     /**
@@ -48,9 +49,6 @@ class Listing extends \Magento\Ui\DataProvider\AbstractDataProvider
      */
     public function getData()
     {
-        $this->collection->setExcludeSetFilter((int)$this->request->getParam('template_id', 0));
-        $this->collection->getSelect()->setPart('order', []);
-
         $items = [];
         foreach ($this->getCollection()->getItems() as $attribute) {
             $items[] = $attribute->toArray();

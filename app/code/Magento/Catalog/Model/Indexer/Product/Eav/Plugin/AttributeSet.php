@@ -20,33 +20,40 @@ class AttributeSet
     /**
      * @var SetFactory
      */
-    private $attributeSetFactory;
+    private $setFactory;
 
     /**
      * @var Processor
      */
-    private $_indexerEavProcessor;
+    protected $_indexerEavProcessor;
 
     /**
      * @var AttributeSet\IndexableAttributeFilter
      */
-    private $_attributeFilter;
+    protected $_attributeFilter;
 
     /**
-     * Constructor
-     *
      * @param Processor $indexerEavProcessor
      * @param AttributeSet\IndexableAttributeFilter $filter
-     * @param SetFactory $attributeSetFactory
      */
-    public function __construct(
-        Processor $indexerEavProcessor,
-        AttributeSet\IndexableAttributeFilter $filter,
-        SetFactory $attributeSetFactory
-    ) {
+    public function __construct(Processor $indexerEavProcessor, AttributeSet\IndexableAttributeFilter $filter)
+    {
         $this->_indexerEavProcessor = $indexerEavProcessor;
         $this->_attributeFilter = $filter;
-        $this->attributeSetFactory = $attributeSetFactory;
+    }
+
+    /**
+     * Return attribute set factory
+     *
+     * @return SetFactory
+     * @deprecated
+     */
+    private function getAttributeSetFactory()
+    {
+        if ($this->setFactory === null) {
+            $this->setFactory = ObjectManager::getInstance()->get(SetFactory::class);
+        }
+        return $this->setFactory;
     }
 
     /**
@@ -61,7 +68,7 @@ class AttributeSet
         $this->requiresReindex = false;
         if ($subject->getId()) {
             /** @var EavAttributeSet $originalSet */
-            $originalSet = $this->attributeSetFactory->create();
+            $originalSet = $this->getAttributeSetFactory()->create();
             $originalSet->initFromSkeleton($subject->getId());
             $originalAttributeCodes = array_flip($this->_attributeFilter->filter($originalSet));
             $subjectAttributeCodes  = array_flip($this->_attributeFilter->filter($subject));

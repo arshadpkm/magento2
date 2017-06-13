@@ -64,7 +64,7 @@ class PostcodeTest extends \PHPUnit_Framework_TestCase
     public function testValidateValue($value, $expected, $countryId, $isOptional)
     {
         $storeLabel = 'Zip/Postal Code';
-        $this->attributeMock->expects($this->any())
+        $this->attributeMock->expects($this->once())
             ->method('getStoreLabel')
             ->willReturn($storeLabel);
 

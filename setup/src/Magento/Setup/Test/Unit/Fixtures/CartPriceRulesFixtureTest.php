@@ -23,16 +23,11 @@ class CartPriceRulesFixtureTest extends \PHPUnit_Framework_TestCase
      */
     private $model;
 
-    /**
-     * @var \Magento\SalesRule\Model\RuleFactory|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $ruleFactoryMock;
-
     public function setUp()
     {
         $this->fixtureModelMock = $this->getMock(\Magento\Setup\Fixtures\FixtureModel::class, [], [], '', false);
-        $this->ruleFactoryMock = $this->getMock(\Magento\SalesRule\Model\RuleFactory::class, ['create'], [], '', false);
-        $this->model = new CartPriceRulesFixture($this->fixtureModelMock, $this->ruleFactoryMock);
+
+        $this->model = new CartPriceRulesFixture($this->fixtureModelMock);
     }
 
     public function testExecute()
@@ -80,7 +75,14 @@ class CartPriceRulesFixtureTest extends \PHPUnit_Framework_TestCase
             ->method('getId')
             ->will($this->returnValue('category_id'));
 
+        $modelMock = $this->getMock(\Magento\SalesRule\Model\Rule::class, [], [], '', false);
+        $modelFactoryMock = $this->getMock(\Magento\SalesRule\Model\RuleFactory::class, ['create'], [], '', false);
+        $modelFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn($modelMock);
+
         $objectValueMap = [
+            [\Magento\SalesRule\Model\RuleFactory::class, $modelFactoryMock],
             [\Magento\Catalog\Model\Category::class, $categoryMock]
         ];
 
@@ -88,7 +90,7 @@ class CartPriceRulesFixtureTest extends \PHPUnit_Framework_TestCase
         $objectManagerMock->expects($this->once())
             ->method('create')
             ->will($this->returnValue($storeManagerMock));
-        $objectManagerMock->expects($this->once())
+        $objectManagerMock->expects($this->exactly(2))
             ->method('get')
             ->will($this->returnValueMap($objectValueMap));
 
@@ -103,14 +105,9 @@ class CartPriceRulesFixtureTest extends \PHPUnit_Framework_TestCase
             ->method('getValue')
             ->will($this->returnValueMap($valueMap));
         $this->fixtureModelMock
-            ->expects($this->exactly(2))
+            ->expects($this->exactly(3))
             ->method('getObjectManager')
             ->will($this->returnValue($objectManagerMock));
-
-        $ruleMock = $this->getMock(\Magento\SalesRule\Model\Rule::class, [], [], '', false);
-        $this->ruleFactoryMock->expects($this->once())
-            ->method('create')
-            ->willReturn($ruleMock);
 
         $this->model->execute();
     }

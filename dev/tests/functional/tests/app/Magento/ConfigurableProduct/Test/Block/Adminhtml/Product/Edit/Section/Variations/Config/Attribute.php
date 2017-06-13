@@ -168,13 +168,6 @@ class Attribute extends Form
     private $wizardImagesStep = '#variation-steps-wizard_step3';
 
     /**
-     * Attributes grid spinner selector
-     *
-     * @var string
-     */
-    private $attributesGridSpinner = '.productFormConfigurable [data-role="spinner"]';
-
-    /**
      * Fill attributes
      *
      * @param array $attributes
@@ -193,11 +186,9 @@ class Attribute extends Form
 
         //select attributes
         $this->getAttributesGrid()->resetFilter();
-        $this->getAttributesGrid()->waitForElementNotVisible($this->attributesGridSpinner);
         $this->getTemplateBlock()->waitLoader();
-
         $attributesList = $this->browser->find($this->selectedAttributes)->getText();
-        if (!$attributesList || $attributesList !== '--') {
+        if ($attributesList != '--') {
             $this->getAttributesGrid()->deselectAttributes();
         }
 
@@ -242,14 +233,6 @@ class Attribute extends Form
         $attributeFixture = ObjectManager::getInstance()->create(
             \Magento\Catalog\Test\Fixture\CatalogProductAttribute::class,
             ['data' => $attribute]
-        );
-
-        $browser = $this->browser;
-        $createSetSelector = $this->createNewVariationSet;
-        $browser->waitUntil(
-            function () use ($browser, $createSetSelector) {
-                return $browser->find($createSetSelector)->isVisible() ? true : null;
-            }
         );
 
         $this->browser->find($this->createNewVariationSet)->click();

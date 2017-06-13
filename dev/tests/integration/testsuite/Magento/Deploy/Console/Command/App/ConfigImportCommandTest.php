@@ -239,12 +239,6 @@ class ConfigImportCommandTest extends \PHPUnit_Framework_TestCase
                             'base_url' => 'http://magento2.local/',
                         ],
                     ],
-                    'currency' => [
-                        'options' => [
-                            'base' => 'USD',
-                            'default' => 'EUR',
-                        ],
-                    ],
                 ],
             ],
         ];
@@ -254,17 +248,6 @@ class ConfigImportCommandTest extends \PHPUnit_Framework_TestCase
                     'web' => [
                         'secure' => [
                             'base_url' => 'wrong_url',
-                        ],
-                    ],
-                ],
-            ],
-        ];
-        $wrongCurrency = [
-            'system' => [
-                'default' => [
-                    'currency' => [
-                        'options' => [
-                            'default' => 'GBP',
                         ],
                     ],
                 ],
@@ -288,16 +271,6 @@ class ConfigImportCommandTest extends \PHPUnit_Framework_TestCase
         $commandTester->execute([]);
 
         $this->assertContains('Import failed: Invalid value. Value must be', $commandTester->getDisplay());
-        $this->assertSame(Cli::RETURN_FAILURE, $commandTester->getStatusCode());
-
-        $this->writeConfig($this->config, $wrongCurrency);
-
-        $commandTester->execute([]);
-
-        $this->assertContains(
-            'Import failed: Sorry, the default display currency you selected is not available in allowed currencies.',
-            $commandTester->getDisplay()
-        );
         $this->assertSame(Cli::RETURN_FAILURE, $commandTester->getStatusCode());
 
         $this->writeConfig(

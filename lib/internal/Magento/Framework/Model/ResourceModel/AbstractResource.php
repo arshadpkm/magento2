@@ -141,16 +141,11 @@ abstract class AbstractResource
      */
     protected function _unserializeField(DataObject $object, $field, $defaultValue = null)
     {
-        $value = $object->getData($field);
-        if ($value) {
-            $value = $this->getSerializer()->unserialize($object->getData($field));
-            if (empty($value)) {
-                $object->setData($field, $defaultValue);
-            } else {
-                $object->setData($field, $value);
-            }
-        } else {
+        $value = $this->getSerializer()->unserialize($object->getData($field));
+        if (empty($value)) {
             $object->setData($field, $defaultValue);
+        } else {
+            $object->setData($field, $value);
         }
     }
 

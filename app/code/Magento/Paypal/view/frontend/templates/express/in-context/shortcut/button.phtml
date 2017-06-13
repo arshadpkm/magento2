@@ -11,19 +11,18 @@ use Magento\Paypal\Block\Express\InContext\Minicart\Button;
  */
 $config = [
     'Magento_Paypal/js/in-context/button' => [
-        'id' => $block->escapeHtml($block->getContainerId()),
-        'linkDataAction' => $block->escapeHtml($block->getLinkAction()),
-        'paypalButton' => $block->escapeHtml(Button::PAYPAL_BUTTON_ID),
-        'addToCartSelector' => $block->escapeHtml($block->getAddToCartSelector())
+        'id' => $block->getContainerId(),
+        'paypalButton' => Button::PAYPAL_BUTTON_ID,
+        'addToCartSelector' => $block->getAddToCartSelector()
     ]
 ];
 
 ?>
 <div data-mage-init='<?php /* @noEscape */ echo json_encode($config); ?>'
-     class="paypal checkout paypal-logo <?php echo $block->escapeHtml($block->getContainerId()); ?>-container">
-    <a data-action="<?php echo $block->escapeHtml($block->getLinkAction()); ?>" href="#">
+     class="paypal checkout paypal-logo <?php /* @noEscape */ echo $block->getContainerId(); ?>-container">
+    <a id="<?php /* @noEscape */ echo $block->getContainerId(); ?>" href="#">
         <img class="paypal-button-hidden"
-             src="<?php echo $block->escapeHtml($block->getImageUrl()); ?>"
+             src="<?php /* @noEscape */ echo $block->getImageUrl() ?>"
              alt="Check out with PayPal" />
     </a>
 </div>

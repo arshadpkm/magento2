@@ -47,32 +47,31 @@ class ConfigCacheTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param $data
-     * @param $expectedResult
-     * @param $unserializeCalledNum
      * @dataProvider getDataProvider
      */
-    public function testGet($data, $expectedResult, $unserializeCalledNum = 1)
+    public function testGet($loadData, $expectedResult)
     {
         $key = 'key';
-        $this->cacheFrontendMock->expects($this->once())
-            ->method('load')
-            ->with('diConfig' . $key)
-            ->willReturn($data);
-        $this->serializerMock->expects($this->exactly($unserializeCalledNum))
+        $this->cacheFrontendMock->expects(
+            $this->once()
+        )->method(
+            'load'
+        )->with(
+            'diConfig' . $key
+        )->will(
+            $this->returnValue($loadData)
+        );
+        $this->serializerMock->expects($this->once())
             ->method('unserialize')
-            ->with($data)
+            ->with($loadData)
             ->willReturn($expectedResult);
         $this->assertEquals($expectedResult, $this->configCache->get($key));
     }
 
-    /**
-     * @return array
-     */
     public function getDataProvider()
     {
         return [
-            [false, false, 0],
+            [false, false],
             ['serialized data', ['some data']],
         ];
     }

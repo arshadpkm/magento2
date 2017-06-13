@@ -97,10 +97,7 @@ class ExclusionStrategy implements FilterStrategyInterface
                 [
                     $alias => $tableName
                 ],
-                $this->resourceConnection->getConnection()->quoteInto(
-                    'search_index.entity_id = category_ids_index.product_id AND category_ids_index.store_id = ?',
-                    $this->storeManager->getStore()->getId()
-                ),
+                'search_index.entity_id = category_ids_index.product_id',
                 []
             );
             $isApplied = true;

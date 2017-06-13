@@ -10,11 +10,9 @@ use Magento\Framework\Indexer\StateInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\Framework\Indexer\ConfigInterface;
-use Magento\Framework\App\ObjectManagerFactory;
-use Magento\Indexer\Model\IndexerFactory;
 
 /**
- * Command to run indexers
+ * Command for reindexing indexers.
  */
 class IndexerReindexCommand extends AbstractIndexerManageCommand
 {
@@ -27,25 +25,6 @@ class IndexerReindexCommand extends AbstractIndexerManageCommand
      * @var \Magento\Framework\Indexer\ConfigInterface
      */
     private $config;
-
-    /**
-     * @var IndexerFactory
-     */
-    private $indexerFactory;
-
-    /**
-     * Constructor
-     *
-     * @param ObjectManagerFactory $objectManagerFactory
-     * @param IndexerFactory|null $indexerFactory
-     */
-    public function __construct(
-        ObjectManagerFactory $objectManagerFactory,
-        IndexerFactory $indexerFactory = null
-    ) {
-        parent::__construct($objectManagerFactory, $indexerFactory);
-        $this->indexerFactory = $indexerFactory;
-    }
 
     /**
      * {@inheritdoc}
@@ -150,9 +129,10 @@ class IndexerReindexCommand extends AbstractIndexerManageCommand
         if (empty($indexerIds)) {
             return $this;
         }
+        $indexerFactory = $this->getObjectManager()->create(\Magento\Indexer\Model\IndexerFactory::class);
         foreach ($indexerIds as $indexerId) {
             /** @var \Magento\Indexer\Model\Indexer $indexer */
-            $indexer = $this->getIndexerFactory()->create();
+            $indexer = $indexerFactory->create();
             $indexer->load($indexerId);
             /** @var \Magento\Indexer\Model\Indexer\State $state */
             $state = $indexer->getState();
@@ -175,19 +155,5 @@ class IndexerReindexCommand extends AbstractIndexerManageCommand
             $this->config = $this->getObjectManager()->get(ConfigInterface::class);
         }
         return $this->config;
-    }
-
-    /**
-     * Get indexer factory
-     *
-     * @return IndexerFactory
-     * @deprecated
-     */
-    private function getIndexerFactory()
-    {
-        if (null === $this->indexerFactory) {
-            $this->indexerFactory = $this->getObjectManager()->get(IndexerFactory::class);
-        }
-        return $this->indexerFactory;
     }
 }

@@ -30,6 +30,14 @@ class TierPrice extends AbstractPrice implements RowValidatorInterface
 
     /**
      * {@inheritdoc}
+     */
+    public function init($context)
+    {
+        return parent::init($context);
+    }
+
+    /**
+     * {@inheritdoc}
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function isValid($value)

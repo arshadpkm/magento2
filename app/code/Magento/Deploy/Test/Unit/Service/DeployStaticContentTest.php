@@ -96,6 +96,7 @@ class DeployStaticContentTest extends \PHPUnit_Framework_TestCase
             '',
             false
         );
+        $this->versionStorage->expects($this->once())->method('save');
 
         $this->service = new DeployStaticContent(
             $this->objectManager,
@@ -106,13 +107,14 @@ class DeployStaticContentTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    /**
-     * @param array $options
-     * @param string $expectedContentVersion
-     * @dataProvider deployDataProvider
-     */
-    public function testDeploy($options, $expectedContentVersion)
+    public function testDeploy()
     {
+        $options = [
+            'strategy' =>  'compact',
+            'no-javascript' => false,
+            'no-html-minify' => false
+        ];
+
         $package = $this->getMock(Package::class, [], [], '', false);
         $package->expects($this->exactly(1))->method('isVirtual')->willReturn(false);
         $package->expects($this->exactly(3))->method('getArea')->willReturn('area');
@@ -123,11 +125,7 @@ class DeployStaticContentTest extends \PHPUnit_Framework_TestCase
             'package' => $package
         ];
 
-        if ($expectedContentVersion) {
-            $this->versionStorage->expects($this->once())->method('save')->with($expectedContentVersion);
-        } else {
-            $this->versionStorage->expects($this->once())->method('save');
-        }
+        $this->versionStorage->expects($this->once())->method('save');
 
         $queue = $this->getMockBuilder(Queue::class)
             ->disableOriginalConstructor()
@@ -194,28 +192,5 @@ class DeployStaticContentTest extends \PHPUnit_Framework_TestCase
             null,
             $this->service->deploy($options)
         );
-    }
-
-    public function deployDataProvider()
-    {
-        return [
-            [
-                [
-                    'strategy' =>  'compact',
-                    'no-javascript' => false,
-                    'no-html-minify' => false
-                ],
-                null // content version value should not be asserted in this case
-            ],
-            [
-                [
-                    'strategy' =>  'compact',
-                    'no-javascript' => false,
-                    'no-html-minify' => false,
-                    'content-version' =>  '123456',
-                ],
-                '123456'
-            ]
-        ];
     }
 }

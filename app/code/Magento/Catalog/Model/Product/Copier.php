@@ -59,9 +59,7 @@ class Copier
 
         /** @var \Magento\Catalog\Model\Product $duplicate */
         $duplicate = $this->productFactory->create();
-        $productData = $product->getData();
-        $productData = $this->removeStockItem($productData);
-        $duplicate->setData($productData);
+        $duplicate->setData($product->getData());
         $duplicate->setOptions([]);
         $duplicate->setIsDuplicate(true);
         $duplicate->setOriginalLinkId($product->getData($metadata->getLinkField()));
@@ -117,22 +115,5 @@ class Copier
                 ->get(\Magento\Framework\EntityManager\MetadataPool::class);
         }
         return $this->metadataPool;
-    }
-
-    /**
-     * Remove stock item
-     *
-     * @param array $productData
-     * @return array
-     */
-    private function removeStockItem(array $productData)
-    {
-        if (isset($productData[ProductInterface::EXTENSION_ATTRIBUTES_KEY])) {
-            $extensionAttributes = $productData[ProductInterface::EXTENSION_ATTRIBUTES_KEY];
-            if (null !== $extensionAttributes->getStockItem()) {
-                $extensionAttributes->setData('stock_item', null);
-            }
-        }
-        return $productData;
     }
 }

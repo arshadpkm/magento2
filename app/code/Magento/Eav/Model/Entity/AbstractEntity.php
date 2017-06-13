@@ -395,6 +395,7 @@ abstract class AbstractEntity extends AbstractResource implements EntityInterfac
      */
     public function getAttribute($attribute)
     {
+
         /** @var $config \Magento\Eav\Model\Config */
         $config = $this->_getConfig();
         if (is_numeric($attribute)) {
@@ -957,18 +958,17 @@ abstract class AbstractEntity extends AbstractResource implements EntityInterfac
 
         if (is_array($row)) {
             $object->addData($row);
-            $this->loadAttributesForObject($attributes, $object);
-
-            $this->_loadModelAttributes($object);
-            $this->_afterLoad($object);
-            $object->afterLoad();
-            $object->setOrigData();
-            $object->setHasDataChanges(false);
         } else {
             $object->isObjectNew(true);
         }
 
+        $this->loadAttributesMetadata($attributes);
 
+        $this->_loadModelAttributes($object);
+        $this->_afterLoad($object);
+        $object->afterLoad();
+        $object->setOrigData();
+        $object->setHasDataChanges(false);
         \Magento\Framework\Profiler::stop('EAV:load_entity');
         return $this;
     }
@@ -976,13 +976,21 @@ abstract class AbstractEntity extends AbstractResource implements EntityInterfac
     /**
      * Loads attributes metadata.
      *
-     * @deprecated Use self::loadAttributesForObject instead
      * @param array|null $attributes
      * @return $this
      */
     protected function loadAttributesMetadata($attributes)
     {
-        $this->loadAttributesForObject($attributes);
+        if (empty($attributes)) {
+            $this->loadAllAttributes();
+        } else {
+            if (!is_array($attributes)) {
+                $attributes = [$attributes];
+            }
+            foreach ($attributes as $attrCode) {
+                $this->getAttribute($attrCode);
+            }
+        }
     }
 
     /**
@@ -1187,7 +1195,7 @@ abstract class AbstractEntity extends AbstractResource implements EntityInterfac
      *
      * @param array &$delete
      * @param AbstractAttribute $attribute
-     * @param AbstractEntity $object
+     * @param \Magento\Eav\Model\Entity\AbstractEntity $object
      * @return void
      */
     private function _aggregateDeleteData(&$delete, $attribute, $object)
@@ -1663,7 +1671,7 @@ abstract class AbstractEntity extends AbstractResource implements EntityInterfac
     {
         $data = [
             'attribute_id' => $attribute->getId(),
-            $this->getLinkField() => $object->getData($this->getLinkField()),
+            $entity->getLinkField() => $object->getData($entity->getLinkField()),
         ];
 
         if (!$this->getEntityTable()) {
@@ -1918,27 +1926,5 @@ abstract class AbstractEntity extends AbstractResource implements EntityInterfac
     public function afterDelete(\Magento\Framework\DataObject $object)
     {
         $this->_afterDelete($object);
-    }
-
-    /**
-     * Load attributes for object
-     *  if the object will not pass all attributes for this entity type will be loaded
-     *
-     * @param array $attributes
-     * @param AbstractEntity|null $object
-     * @return void
-     */
-    protected function loadAttributesForObject($attributes, $object = null)
-    {
-        if (empty($attributes)) {
-            $this->loadAllAttributes($object);
-        } else {
-            if (!is_array($attributes)) {
-                $attributes = [$attributes];
-            }
-            foreach ($attributes as $attrCode) {
-                $this->getAttribute($attrCode);
-            }
-        }
     }
 }

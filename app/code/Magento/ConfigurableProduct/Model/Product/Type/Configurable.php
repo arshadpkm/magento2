@@ -790,11 +790,7 @@ class Configurable extends \Magento\Catalog\Model\Product\Type\AbstractType
             ['group' => 'CONFIGURABLE', 'method' => __METHOD__]
         );
         if ($attributesOption = $product->getCustomOption('attributes')) {
-            $data = $attributesOption->getValue();
-            if (!$data) {
-                return $attributes;
-            }
-            $data = $this->serializer->unserialize($data);
+            $data = $this->serializer->unserialize($attributesOption->getValue());
             $this->getUsedProductAttributeIds($product);
 
             $usedAttributes = $product->getData($this->_usedAttributes);
@@ -1308,11 +1304,7 @@ class Configurable extends \Magento\Catalog\Model\Product\Type\AbstractType
     private function readUsedProductsCacheData($cacheKey)
     {
         $usedProducts = null;
-        $data = $this->getCache()->load($cacheKey);
-        if (!$data) {
-            return $usedProducts;
-        }
-        $data = $this->serializer->unserialize($data);
+        $data = $this->serializer->unserialize($this->getCache()->load($cacheKey));
         if (!empty($data)) {
             $usedProducts = [];
             foreach ($data as $item) {

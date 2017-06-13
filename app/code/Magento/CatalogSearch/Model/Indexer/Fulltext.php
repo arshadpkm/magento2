@@ -14,7 +14,7 @@ use Magento\Framework\Search\Request\DimensionFactory;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
- * Provide functionality for Fulltext Search indexing.
+ * Provide functionality for Fulltext Search indexing
  */
 class Fulltext implements \Magento\Framework\Indexer\ActionInterface, \Magento\Framework\Mview\ActionInterface
 {
@@ -122,8 +122,7 @@ class Fulltext implements \Magento\Framework\Indexer\ActionInterface, \Magento\F
         ]);
         foreach ($storeIds as $storeId) {
             $dimension = $this->dimensionFactory->create(['name' => 'scope', 'value' => $storeId]);
-            $productIds = array_unique(array_merge($ids, $this->fulltextResource->getRelationsByChild($ids)));
-            $saveHandler->deleteIndex([$dimension], new \ArrayObject($productIds));
+            $saveHandler->deleteIndex([$dimension], new \ArrayObject($ids));
             $saveHandler->saveIndex([$dimension], $this->fullAction->rebuildStoreIndex($storeId, $ids));
         }
     }

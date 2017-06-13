@@ -6,9 +6,10 @@
 namespace Magento\Config\Console\Command;
 
 use Magento\Config\App\Config\Type\System;
-use Magento\Config\Console\Command\ConfigSet\ProcessorFacadeFactory;
+use Magento\Config\Console\Command\ConfigSet\EmulatedProcessorFacade;
 use Magento\Deploy\Model\DeploymentConfig\ChangeDetector;
 use Magento\Deploy\Model\DeploymentConfig\Hash;
+use Magento\Deploy\Model\DeploymentConfig\Validator;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Console\Cli;
 use Symfony\Component\Console\Command\Command;
@@ -33,11 +34,11 @@ class ConfigSetCommand extends Command
     /**#@-*/
 
     /**
-     * Emulator adminhtml area for CLI command.
+     * The emulated processor facade.
      *
-     * @var EmulatedAdminhtmlAreaProcessor
+     * @var EmulatedProcessorFacade
      */
-    private $emulatedAreaProcessor;
+    private $emulatedProcessorFacade;
 
     /**
      * The config change detector.
@@ -54,28 +55,18 @@ class ConfigSetCommand extends Command
     private $hash;
 
     /**
-     * The factory for processor facade.
-     *
-     * @var ProcessorFacadeFactory
-     */
-    private $processorFacadeFactory;
-
-    /**
-     * @param EmulatedAdminhtmlAreaProcessor $emulatedAreaProcessor Emulator adminhtml area for CLI command
+     * @param EmulatedProcessorFacade $emulatedProcessorFacade The emulated processor facade
      * @param ChangeDetector $changeDetector The config change detector
      * @param Hash $hash The hash manager
-     * @param ProcessorFacadeFactory $processorFacadeFactory The factory for processor facade
      */
     public function __construct(
-        EmulatedAdminhtmlAreaProcessor $emulatedAreaProcessor,
+        EmulatedProcessorFacade $emulatedProcessorFacade,
         ChangeDetector $changeDetector,
-        Hash $hash,
-        ProcessorFacadeFactory $processorFacadeFactory
+        Hash $hash
     ) {
-        $this->emulatedAreaProcessor = $emulatedAreaProcessor;
+        $this->emulatedProcessorFacade = $emulatedProcessorFacade;
         $this->changeDetector = $changeDetector;
         $this->hash = $hash;
-        $this->processorFacadeFactory = $processorFacadeFactory;
 
         parent::__construct();
     }
@@ -137,15 +128,13 @@ class ConfigSetCommand extends Command
         }
 
         try {
-            $message = $this->emulatedAreaProcessor->process(function () use ($input) {
-                return $this->processorFacadeFactory->create()->process(
-                    $input->getArgument(static::ARG_PATH),
-                    $input->getArgument(static::ARG_VALUE),
-                    $input->getOption(static::OPTION_SCOPE),
-                    $input->getOption(static::OPTION_SCOPE_CODE),
-                    $input->getOption(static::OPTION_LOCK)
-                );
-            });
+            $message = $this->emulatedProcessorFacade->process(
+                $input->getArgument(static::ARG_PATH),
+                $input->getArgument(static::ARG_VALUE),
+                $input->getOption(static::OPTION_SCOPE),
+                $input->getOption(static::OPTION_SCOPE_CODE),
+                $input->getOption(static::OPTION_LOCK)
+            );
 
             $this->hash->regenerate(System::CONFIG_TYPE);
 

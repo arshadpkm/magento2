@@ -395,6 +395,16 @@ class ProfilerTest extends \PHPUnit_Framework_TestCase
                     'baseDir' => null
                 ],
             ],
+            'Ajax call' => [
+                1,
+                true,
+                [
+                    'driverConfigs' => [['output' => 'firebug']],
+                    'driverFactory' => $driverFactory,
+                    'tagFilters' => [],
+                    'baseDir' => ''
+                ],
+            ],
             'Non ajax call' => [
                 1,
                 false,

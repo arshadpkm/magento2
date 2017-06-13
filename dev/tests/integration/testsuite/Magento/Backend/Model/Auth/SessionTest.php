@@ -7,8 +7,6 @@ namespace Magento\Backend\Model\Auth;
 
 /**
  * @magentoAppArea adminhtml
- * @magentoAppIsolation enabled
- * @magentoDbIsolation enabled
  */
 class SessionTest extends \PHPUnit_Framework_TestCase
 {
@@ -36,7 +34,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
         $this->auth = $this->objectManager->create(\Magento\Backend\Model\Auth::class);
         $this->authSession = $this->objectManager->create(\Magento\Backend\Model\Auth\Session::class);
         $this->auth->setAuthStorage($this->authSession);
-        $this->auth->logout();
     }
 
     protected function tearDown()

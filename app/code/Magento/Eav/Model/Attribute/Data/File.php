@@ -176,6 +176,7 @@ class File extends \Magento\Eav\Model\Attribute\Data\AbstractData
 
         $errors = [];
         $attribute = $this->getAttribute();
+        $label = $attribute->getStoreLabel();
 
         $toDelete = !empty($value['delete']) ? true : false;
         $toUpload = !empty($value['tmp_name']) ? true : false;
@@ -189,7 +190,6 @@ class File extends \Magento\Eav\Model\Attribute\Data\AbstractData
         }
 
         if ($attribute->getIsRequired() && !$toUpload) {
-            $label = __($attribute->getStoreLabel());
             $errors[] = __('"%1" is a required value.', $label);
         }
 
@@ -229,7 +229,7 @@ class File extends \Magento\Eav\Model\Attribute\Data\AbstractData
             }
         }
 
-        $destinationFolder = $attribute->getEntityType()->getEntityTypeCode();
+        $destinationFolder = $attribute->getEntity()->getEntityTypeCode();
 
         // unlink entity file
         if ($toDelete) {

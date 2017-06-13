@@ -1011,16 +1011,7 @@ class Category extends AbstractResource
     public function load($object, $entityId, $attributes = [])
     {
         $this->_attributes = [];
-        $select = $this->_getLoadRowSelect($object, $entityId);
-        $row = $this->getConnection()->fetchRow($select);
-
-        if (is_array($row)) {
-            $object->addData($row);
-        } else {
-            $object->isObjectNew(true);
-        }
-
-        $this->loadAttributesForObject($attributes, $object);
+        $this->loadAttributesMetadata($attributes);
         $object = $this->getEntityManager()->load($object, $entityId);
         if (!$this->getEntityManager()->has($object)) {
             $object->isObjectNew(true);

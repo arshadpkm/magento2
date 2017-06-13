@@ -150,30 +150,24 @@ class CountryCreditCardTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @dataProvider afterLoadDataProvider
      * @param string $encodedValue
      * @param array|null $value
      * @param array $hashData
      * @param array|null $expected
-     * @param int $unserializeCalledNum
-     * @dataProvider afterLoadDataProvider
      */
-    public function testAfterLoad(
-        $encodedValue,
-        $value,
-        array $hashData,
-        $expected,
-        $unserializeCalledNum = 1
-    ) {
+    public function testAfterLoad($encodedValue, $value, array $hashData, $expected)
+    {
         $this->model->setValue($encodedValue);
         $index = 0;
         foreach ($hashData as $hash) {
-            $this->mathRandomMock->expects($this->at($index))
+            $this->mathRandomMock->expects(static::at($index))
                 ->method('getUniqueHash')
                 ->willReturn($hash);
             $index++;
         }
 
-        $this->serializerMock->expects($this->exactly($unserializeCalledNum))
+        $this->serializerMock->expects($this->once())
             ->method('unserialize')
             ->with($encodedValue)
             ->willReturn($value);
@@ -184,7 +178,6 @@ class CountryCreditCardTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Get data to test saved credit cards types
-     *
      * @return array
      */
     public function afterLoadDataProvider()
@@ -200,8 +193,7 @@ class CountryCreditCardTest extends \PHPUnit_Framework_TestCase
                 'encoded' => '',
                 'value' => null,
                 'randomHash' => [],
-                'expected' => null,
-                0
+                'expected' => null
             ],
             'valid data' => [
                 'encoded' => '{"US":["AE","VI","MA"],"AF":["AE","MA"]}',

@@ -89,11 +89,10 @@ class CountryCreditCard extends Value
      */
     public function afterLoad()
     {
-        if ($this->getValue()) {
-            $value = $this->serializer->unserialize($this->getValue());
-            if (is_array($value)) {
-                $this->setValue($this->encodeArrayFieldValue($value));
-            }
+        $value = $this->serializer->unserialize($this->getValue());
+        if (is_array($value)) {
+            $value = $this->encodeArrayFieldValue($value);
+            $this->setValue($value);
         }
         return $this;
     }

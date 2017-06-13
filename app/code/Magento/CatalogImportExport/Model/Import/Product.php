@@ -3,21 +3,21 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
+// @codingStandardsIgnoreFile
+
 namespace Magento\CatalogImportExport\Model\Import;
 
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\CatalogImportExport\Model\Import\Product\RowValidatorInterface as ValidatorInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Model\ResourceModel\Db\ObjectRelationProcessor;
 use Magento\Framework\Model\ResourceModel\Db\TransactionManagerInterface;
 use Magento\Framework\Stdlib\DateTime;
-use Magento\Framework\Filesystem;
 use Magento\ImportExport\Model\Import;
 use Magento\ImportExport\Model\Import\Entity\AbstractEntity;
 use Magento\ImportExport\Model\Import\ErrorProcessing\ProcessingError;
 use Magento\ImportExport\Model\Import\ErrorProcessing\ProcessingErrorAggregatorInterface;
-use Magento\Catalog\Model\Config as CatalogConfig;
 
 /**
  * Import entity product model
@@ -27,7 +27,6 @@ use Magento\Catalog\Model\Config as CatalogConfig;
  * @SuppressWarnings(PHPMD.TooManyFields)
  * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
- * @codingStandardsIgnoreFile
  */
 class Product extends \Magento\ImportExport\Model\Import\Entity\AbstractEntity
 {
@@ -659,20 +658,6 @@ class Product extends \Magento\ImportExport\Model\Import\Entity\AbstractEntity
     private $multiLineSeparatorForRegexp;
 
     /**
-     * Container for filesystem object.
-     *
-     * @var Filesystem
-     */
-    private $filesystem;
-
-    /**
-     * Catalog config.
-     *
-     * @var CatalogConfig
-     */
-    private $catalogConfig;
-
-    /**
      * @param \Magento\Framework\Json\Helper\Data $jsonHelper
      * @param \Magento\ImportExport\Helper\Data $importExportData
      * @param \Magento\ImportExport\Model\ResourceModel\Import\Data $importData
@@ -710,7 +695,6 @@ class Product extends \Magento\ImportExport\Model\Import\Entity\AbstractEntity
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param array $data
      * @param array $dateAttrCodes
-     * @param CatalogConfig $catalogConfig
      * @throws \Magento\Framework\Exception\LocalizedException
      *
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
@@ -753,8 +737,7 @@ class Product extends \Magento\ImportExport\Model\Import\Entity\AbstractEntity
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Catalog\Model\Product\Url $productUrl,
         array $data = [],
-        array $dateAttrCodes = [],
-        CatalogConfig $catalogConfig = null
+        array $dateAttrCodes = []
     ) {
         $this->_eventManager = $eventManager;
         $this->stockRegistry = $stockRegistry;
@@ -768,7 +751,6 @@ class Product extends \Magento\ImportExport\Model\Import\Entity\AbstractEntity
         $this->_linkFactory = $linkFactory;
         $this->_proxyProdFactory = $proxyProdFactory;
         $this->_uploaderFactory = $uploaderFactory;
-        $this->filesystem = $filesystem;
         $this->_mediaDirectory = $filesystem->getDirectoryWrite(DirectoryList::ROOT);
         $this->_stockResItemFac = $stockResItemFac;
         $this->_localeDate = $localeDate;
@@ -785,9 +767,6 @@ class Product extends \Magento\ImportExport\Model\Import\Entity\AbstractEntity
         $this->scopeConfig = $scopeConfig;
         $this->productUrl = $productUrl;
         $this->dateAttrCodes = array_merge($this->dateAttrCodes, $dateAttrCodes);
-        $this->catalogConfig = $catalogConfig ?: \Magento\Framework\App\ObjectManager::getInstance()
-            ->get(CatalogConfig::class);
-
         parent::__construct(
             $jsonHelper,
             $importExportData,
@@ -1351,7 +1330,7 @@ class Product extends \Magento\ImportExport\Model\Import\Entity\AbstractEntity
             $entityTable = $this->_resourceFactory->create()->getEntityTable();
         }
         if ($entityRowsUp) {
-            $this->_connection->insertOnDuplicate($entityTable, $entityRowsUp, ['updated_at', 'attribute_set_id']);
+            $this->_connection->insertOnDuplicate($entityTable, $entityRowsUp, ['updated_at']);
         }
         if ($entityRowsIn) {
             $this->_connection->insertMultiple($entityTable, $entityRowsIn);
@@ -1584,29 +1563,9 @@ class Product extends \Magento\ImportExport\Model\Import\Entity\AbstractEntity
                 // 1. Entity phase
                 if (isset($this->_oldSku[$rowSku])) {
                     // existing row
-                    if (isset($rowData['attribute_set_code'])) {
-                        $attributeSetId = $this->catalogConfig->getAttributeSetId(
-                            $this->getEntityTypeId(),
-                            $rowData['attribute_set_code']
-                        );
-
-                        // wrong attribute_set_code was received
-                        if (!$attributeSetId) {
-                            throw new \Magento\Framework\Exception\LocalizedException(
-                                __(
-                                    'Wrong attribute set code "%1", please correct it and try again.',
-                                    $rowData['attribute_set_code']
-                                )
-                            );
-                        }
-                    } else {
-                        $attributeSetId = $this->skuProcessor->getNewSku($rowSku)['attr_set_id'];
-                    }
-
                     $entityRowsUp[] = [
                         'updated_at' => (new \DateTime())->format(DateTime::DATETIME_PHP_FORMAT),
-                        'attribute_set_id' => $attributeSetId,
-                        $this->getProductEntityLinkField() => $this->_oldSku[$rowSku][$this->getProductEntityLinkField()]
+                        $this->getProductEntityLinkField() => $this->_oldSku[$rowSku][$this->getProductEntityLinkField()],
                     ];
                 } else {
                     if (!$productLimit || $productsQty < $productLimit) {
@@ -1686,7 +1645,6 @@ class Product extends \Magento\ImportExport\Model\Import\Entity\AbstractEntity
                     foreach ($columnImages as $columnImageKey => $columnImage) {
                         if (!isset($uploadedImages[$columnImage])) {
                             $uploadedFile = $this->uploadMediaFiles($columnImage, true);
-                            $uploadedFile = $uploadedFile ?: $this->getSystemFile($columnImage);
                             if ($uploadedFile) {
                                 $uploadedImages[$columnImage] = $uploadedFile;
                             } else {
@@ -2020,21 +1978,6 @@ class Product extends \Magento\ImportExport\Model\Import\Entity\AbstractEntity
         } catch (\Exception $e) {
             return '';
         }
-    }
-
-    /**
-     * Try to find file by it's path.
-     *
-     * @param string $fileName
-     * @return string
-     */
-    private function getSystemFile($fileName)
-    {
-        $filePath = 'catalog' . DIRECTORY_SEPARATOR . 'product' . DIRECTORY_SEPARATOR . $fileName;
-        /** @var \Magento\Framework\Filesystem\Directory\ReadInterface $read */
-        $read = $this->filesystem->getDirectoryRead(DirectoryList::MEDIA);
-
-        return $read->isExist($filePath) && $read->isReadable($filePath) ? $fileName : '';
     }
 
     /**

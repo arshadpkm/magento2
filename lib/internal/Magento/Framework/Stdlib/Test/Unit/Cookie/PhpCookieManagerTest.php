@@ -15,15 +15,10 @@ namespace Magento\Framework\Stdlib\Test\Unit\Cookie
     use Magento\Framework\Exception\InputException;
     use Magento\Framework\Stdlib\Cookie\FailureToSendException;
     use Magento\Framework\Stdlib\Cookie\CookieSizeLimitReachedException;
-    use Magento\Framework\Phrase;
-    use Magento\Framework\HTTP\Header as HttpHeader;
-    use Psr\Log\LoggerInterface;
     // @codingStandardsIgnoreEnd
 
     /**
      * Test PhpCookieManager
-     *
-     * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
      */
     class PhpCookieManagerTest extends \PHPUnit_Framework_TestCase
     {
@@ -101,16 +96,6 @@ namespace Magento\Framework\Stdlib\Test\Unit\Cookie
         protected $readerMock;
 
         /**
-         * @var LoggerInterface | \PHPUnit_Framework_MockObject_MockObject
-         */
-        protected $loggerMock;
-
-        /**
-         * @var HttpHeader | \PHPUnit_Framework_MockObject_MockObject
-         */
-        protected $httpHeaderMock;
-
-        /**
          * @var array
          */
         protected $cookieArray;
@@ -128,18 +113,11 @@ namespace Magento\Framework\Stdlib\Test\Unit\Cookie
                 ->disableOriginalConstructor()
                 ->getMock();
             $this->readerMock = $this->getMock(\Magento\Framework\Stdlib\Cookie\CookieReaderInterface::class);
-            $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-                ->getMockForAbstractClass();
-            $this->httpHeaderMock = $this->getMockBuilder(HttpHeader::class)
-                ->disableOriginalConstructor()
-                ->getMock();
             $this->cookieManager = $this->objectManager->getObject(
                 \Magento\Framework\Stdlib\Cookie\PhpCookieManager::class,
                 [
                     'scope' => $this->scopeMock,
                     'reader' => $this->readerMock,
-                    'logger' => $this->loggerMock,
-                    'httpHeader' => $this->httpHeaderMock
                 ]
             );
 
@@ -525,11 +503,11 @@ namespace Magento\Framework\Stdlib\Test\Unit\Cookie
                 \Magento\Framework\Stdlib\Cookie\PublicCookieMetadata::class
             );
 
-            $userAgent = 'some_user_agent';
+            $cookieValue = 'some_value';
 
             // Set self::MAX_NUM_COOKIES number of cookies in superglobal $_COOKIE.
             for ($i = count($_COOKIE); $i < self::MAX_NUM_COOKIES; $i++) {
-                $_COOKIE['test_cookie_' . $i] = self::COOKIE_VALUE . '_' . $i;
+                $_COOKIE['test_cookie_' . $i] = 'some_value';
             }
 
             $this->scopeMock->expects($this->once())
@@ -539,22 +517,19 @@ namespace Magento\Framework\Stdlib\Test\Unit\Cookie
                     $this->returnValue($publicCookieMetadata)
                 );
 
-            $this->httpHeaderMock->expects($this->any())
-                ->method('getHttpUserAgent')
-                ->willReturn($userAgent);
-
-            $this->loggerMock->expects($this->once())
-                ->method('warning')
-                ->with(
-                    new Phrase('Unable to send the cookie. Maximum number of cookies would be exceeded.'),
-                    array_merge($_COOKIE, ['user-agent' => $userAgent])
+            try {
+                $this->cookieManager->setPublicCookie(
+                    self::MAX_COOKIE_SIZE_TEST_NAME,
+                    $cookieValue,
+                    $publicCookieMetadata
                 );
-
-            $this->cookieManager->setPublicCookie(
-                self::MAX_COOKIE_SIZE_TEST_NAME,
-                self::COOKIE_VALUE,
-                $publicCookieMetadata
-            );
+                $this->fail('Failed to throw exception of too many cookies.');
+            } catch (CookieSizeLimitReachedException $e) {
+                $this->assertEquals(
+                    'Unable to send the cookie. Maximum number of cookies would be exceeded.',
+                    $e->getMessage()
+                );
+            }
         }
 
         /**

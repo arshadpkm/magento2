@@ -6,11 +6,11 @@
 namespace Magento\Deploy\Test\Unit\Console\Command\App;
 
 use Magento\Config\App\Config\Type\System;
-use Magento\Config\Console\Command\EmulatedAdminhtmlAreaProcessor;
 use Magento\Deploy\Console\Command\App\SensitiveConfigSet\SensitiveConfigSetFacade;
 use Magento\Deploy\Console\Command\App\SensitiveConfigSetCommand;
 use Magento\Deploy\Model\DeploymentConfig\ChangeDetector;
 use Magento\Deploy\Model\DeploymentConfig\Hash;
+use Magento\Deploy\Model\DeploymentConfig\Validator;
 use Magento\Framework\Console\Cli;
 use PHPUnit_Framework_MockObject_MockObject as MockObject;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -36,11 +36,6 @@ class SensitiveConfigSetCommandTest extends \PHPUnit_Framework_TestCase
     private $hashMock;
 
     /**
-     * @var EmulatedAdminhtmlAreaProcessor|MockObject
-     */
-    private $emulatedAreaProcessorMock;
-
-    /**
      * @var SensitiveConfigSetCommand
      */
     private $model;
@@ -59,15 +54,11 @@ class SensitiveConfigSetCommandTest extends \PHPUnit_Framework_TestCase
         $this->hashMock = $this->getMockBuilder(Hash::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->emulatedAreaProcessorMock = $this->getMockBuilder(EmulatedAdminhtmlAreaProcessor::class)
-            ->disableOriginalConstructor()
-            ->getMock();
 
         $this->model = new SensitiveConfigSetCommand(
             $this->facadeMock,
             $this->changeDetectorMock,
-            $this->hashMock,
-            $this->emulatedAreaProcessorMock
+            $this->hashMock
         );
     }
 
@@ -76,7 +67,7 @@ class SensitiveConfigSetCommandTest extends \PHPUnit_Framework_TestCase
         $this->changeDetectorMock->expects($this->once())
             ->method('hasChanges')
             ->willReturn(false);
-        $this->emulatedAreaProcessorMock->expects($this->once())
+        $this->facadeMock->expects($this->once())
             ->method('process');
         $this->hashMock->expects($this->once())
             ->method('regenerate')
@@ -96,7 +87,7 @@ class SensitiveConfigSetCommandTest extends \PHPUnit_Framework_TestCase
         $this->changeDetectorMock->expects($this->once())
             ->method('hasChanges')
             ->willReturn(true);
-        $this->emulatedAreaProcessorMock->expects($this->never())
+        $this->facadeMock->expects($this->never())
             ->method('process');
         $this->hashMock->expects($this->never())
             ->method('regenerate');
@@ -119,7 +110,7 @@ class SensitiveConfigSetCommandTest extends \PHPUnit_Framework_TestCase
         $this->changeDetectorMock->expects($this->once())
             ->method('hasChanges')
             ->willReturn(false);
-        $this->emulatedAreaProcessorMock->expects($this->once())
+        $this->facadeMock->expects($this->once())
             ->method('process')
             ->willThrowException(new \Exception('Some exception'));
 

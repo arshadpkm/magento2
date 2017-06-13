@@ -36,8 +36,6 @@ define(
                 braintreeDeviceData: null,
                 paymentMethodNonce: null,
                 lastBillingAddress: null,
-                ccCode: null,
-                ccMessageContainer: null,
                 validatorManager: validatorManager,
                 code: 'braintree',
 
@@ -140,37 +138,7 @@ define(
                     return;
                 }
 
-                this.restoreMessageContainer();
-                this.restoreCode();
-
-                /**
-                 * Define onReady callback
-                 */
-                braintree.onReady = function () {};
                 this.initBraintree();
-            },
-
-            /**
-             * Restore original message container for cc-form component
-             */
-            restoreMessageContainer: function () {
-                this.messageContainer = this.ccMessageContainer;
-            },
-
-            /**
-             * Restore original code for cc-form component
-             */
-            restoreCode: function () {
-                this.code = this.ccCode;
-            },
-
-            /** @inheritdoc */
-            initChildren: function () {
-                this._super();
-                this.ccMessageContainer = this.messageContainer;
-                this.ccCode = this.code;
-
-                return this;
             },
 
             /**

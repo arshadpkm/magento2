@@ -11,11 +11,11 @@
             <div class="checkout-agreement required">
                 <input type="checkbox" class="required-entry"
                        data-bind="attr: {
-                                    'id': $parent.getCheckboxId($parentContext, agreementId),
+                                    'id': 'agreement_' + agreementId,
                                     'name': 'agreement[' + agreementId + ']',
                                     'value': agreementId
                                     }"/>
-                <label data-bind="attr: {'for': $parent.getCheckboxId($parentContext, agreementId)}">
+                <label data-bind="attr: {'for': 'agreement_' + agreementId}">
                     <button type="button"
                             class="action action-show"
                             data-bind="click: function(data, event) { return $parent.showContent(data, event) }"

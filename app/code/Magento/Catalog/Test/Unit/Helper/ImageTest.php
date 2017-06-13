@@ -42,11 +42,6 @@ class ImageTest extends \PHPUnit_Framework_TestCase
      */
     protected $scopeConfig;
 
-    /**
-     * @var \Magento\Catalog\Model\View\Asset\PlaceholderFactory|\PHPUnit_Framework_MockObject_MockObject
-     */
-    protected $placeholderFactory;
-
     protected function setUp()
     {
         $this->mockContext();
@@ -59,16 +54,11 @@ class ImageTest extends \PHPUnit_Framework_TestCase
         $this->viewConfig = $this->getMockBuilder(\Magento\Framework\View\ConfigInterface::class)
             ->getMockForAbstractClass();
 
-        $this->placeholderFactory = $this->getMockBuilder(\Magento\Catalog\Model\View\Asset\PlaceholderFactory::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
         $this->helper = new \Magento\Catalog\Helper\Image(
             $this->context,
             $this->imageFactory,
             $this->assetRepository,
-            $this->viewConfig,
-            $this->placeholderFactory
+            $this->viewConfig
         );
     }
 

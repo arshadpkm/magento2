@@ -23,13 +23,6 @@ class BlockGallery extends Section
     private $imageLoader = '.image.image-placeholder .file-row';
 
     /**
-     * Selector for first uploaded image.
-     *
-     * @var string
-     */
-    private $baseImage = '.image.item.base-image';
-
-    /**
      * Selector for image upload input.
      *
      * @var string
@@ -50,7 +43,6 @@ class BlockGallery extends Section
             $uploadElement = $element->find($this->imageUploadInput, Locator::SELECTOR_CSS, 'upload');
             $uploadElement->setValue($imageData['file']);
             $this->waitForElementNotVisible($this->imageLoader);
-            $this->waitForElementVisible($this->baseImage);
         }
         return $this;
     }

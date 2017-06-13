@@ -33,7 +33,7 @@ class Conditions extends \Magento\Backend\Block\Widget\Form\Generic implements
     private $ruleFactory;
 
     /**
-     * Constructor
+     * Initialize dependencies.
      *
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Framework\Registry $registry
@@ -41,7 +41,6 @@ class Conditions extends \Magento\Backend\Block\Widget\Form\Generic implements
      * @param \Magento\Rule\Block\Conditions $conditions
      * @param \Magento\Backend\Block\Widget\Form\Renderer\Fieldset $rendererFieldset
      * @param array $data
-     * @param \Magento\SalesRule\Model\RuleFactory|null $ruleFactory
      */
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
@@ -49,14 +48,26 @@ class Conditions extends \Magento\Backend\Block\Widget\Form\Generic implements
         \Magento\Framework\Data\FormFactory $formFactory,
         \Magento\Rule\Block\Conditions $conditions,
         \Magento\Backend\Block\Widget\Form\Renderer\Fieldset $rendererFieldset,
-        array $data = [],
-        \Magento\SalesRule\Model\RuleFactory $ruleFactory = null
+        array $data = []
     ) {
         $this->_rendererFieldset = $rendererFieldset;
         $this->_conditions = $conditions;
-        $this->ruleFactory = $ruleFactory ?: ObjectManager::getInstance()
-            ->get(\Magento\SalesRule\Model\RuleFactory::class);
         parent::__construct($context, $registry, $formFactory, $data);
+    }
+
+    /**
+     * The getter function to get the new RuleFactory dependency
+     *
+     * @return \Magento\SalesRule\Model\RuleFactory
+     *
+     * @deprecated
+     */
+    private function getRuleFactory()
+    {
+        if ($this->ruleFactory === null) {
+            $this->ruleFactory = ObjectManager::getInstance()->get(\Magento\SalesRule\Model\RuleFactory::class);
+        }
+        return $this->ruleFactory;
     }
 
     /**
@@ -70,6 +81,7 @@ class Conditions extends \Magento\Backend\Block\Widget\Form\Generic implements
 
     /**
      * {@inheritdoc}
+     * @codeCoverageIgnore
      */
     public function getTabUrl()
     {
@@ -78,6 +90,7 @@ class Conditions extends \Magento\Backend\Block\Widget\Form\Generic implements
 
     /**
      * {@inheritdoc}
+     * @codeCoverageIgnore
      */
     public function isAjaxLoaded()
     {
@@ -86,6 +99,7 @@ class Conditions extends \Magento\Backend\Block\Widget\Form\Generic implements
 
     /**
      * {@inheritdoc}
+     * @codeCoverageIgnore
      */
     public function getTabLabel()
     {
@@ -94,6 +108,7 @@ class Conditions extends \Magento\Backend\Block\Widget\Form\Generic implements
 
     /**
      * {@inheritdoc}
+     * @codeCoverageIgnore
      */
     public function getTabTitle()
     {
@@ -102,6 +117,7 @@ class Conditions extends \Magento\Backend\Block\Widget\Form\Generic implements
 
     /**
      * {@inheritdoc}
+     * @codeCoverageIgnore
      */
     public function canShowTab()
     {
@@ -110,6 +126,7 @@ class Conditions extends \Magento\Backend\Block\Widget\Form\Generic implements
 
     /**
      * {@inheritdoc}
+     * @codeCoverageIgnore
      */
     public function isHidden()
     {
@@ -143,7 +160,7 @@ class Conditions extends \Magento\Backend\Block\Widget\Form\Generic implements
     {
         if (!$model) {
             $id = $this->getRequest()->getParam('id');
-            $model = $this->ruleFactory->create();
+            $model = $this->getRuleFactory()->create();
             $model->load($id);
         }
         $conditionsFieldSetId = $model->getConditionsFieldSetId($formName);

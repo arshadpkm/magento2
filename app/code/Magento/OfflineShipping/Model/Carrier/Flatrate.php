@@ -146,7 +146,10 @@ class Flatrate extends AbstractCarrier implements CarrierInterface
 
         $shippingPrice = $this->getFinalPriceWithHandlingFee($shippingPrice);
 
-        if ($shippingPrice !== false && $request->getPackageQty() == $freeBoxes) {
+        if ($shippingPrice !== false && (
+                $request->getFreeShipping() === true || $request->getPackageQty() == $freeBoxes
+            )
+        ) {
             $shippingPrice = '0.00';
         }
         return $shippingPrice;

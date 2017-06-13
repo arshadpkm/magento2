@@ -11,7 +11,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\ProductMetadata;
 use Magento\Framework\App\State;
 use Magento\Framework\Composer\ComposerJsonFinder;
-use Magento\Framework\Console\Exception\GenerationDirectoryAccessException;
+use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Shell\ComplexParameter;
@@ -66,27 +66,17 @@ class Cli extends Console\Application
     /**
      * @param string $name the application name
      * @param string $version the application version
-     * @SuppressWarnings(PHPMD.ExitExpression)
      */
     public function __construct($name = 'UNKNOWN', $version = 'UNKNOWN')
     {
-        try {
-            $configuration = require BP . '/setup/config/application.config.php';
-            $bootstrapApplication = new Application();
-            $application = $bootstrapApplication->bootstrap($configuration);
-            $this->serviceManager = $application->getServiceManager();
+        $configuration = require BP . '/setup/config/application.config.php';
+        $bootstrapApplication = new Application();
+        $application = $bootstrapApplication->bootstrap($configuration);
+        $this->serviceManager = $application->getServiceManager();
 
-            $this->assertCompilerPreparation();
-            $this->initObjectManager();
-            $this->assertGenerationPermissions();
-        } catch (\Exception $exception) {
-            $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-            $output->writeln(
-                '<error>' . $exception->getMessage() . '</error>'
-            );
-
-            exit(static::RETURN_FAILURE);
-        }
+        $this->assertCompilerPreparation();
+        $this->initObjectManager();
+        $this->assertGenerationPermissions();
 
         if ($version == 'UNKNOWN') {
             $directoryList = new DirectoryList(BP);
@@ -101,13 +91,20 @@ class Cli extends Console\Application
     /**
      * {@inheritdoc}
      *
-     * @throws \Exception The exception in case of unexpected error
+     * @throws \Exception the exception in case of unexpected error
      */
     public function doRun(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
         $exitCode = parent::doRun($input, $output);
 
         if ($this->initException) {
+            $output->writeln(
+                "<error>We're sorry, an error occurred. Try clearing the cache and code generation directories. "
+                . "By default, they are: " . $this->getDefaultDirectoryPath(DirectoryList::CACHE) . ", "
+                . $this->getDefaultDirectoryPath(DirectoryList::GENERATED_METADATA) . ", "
+                . $this->getDefaultDirectoryPath(DirectoryList::GENERATED_CODE) . ", and var/page_cache.</error>"
+            );
+
             throw $this->initException;
         }
 
@@ -157,17 +154,24 @@ class Cli extends Console\Application
      * Object Manager initialization.
      *
      * @return void
+     * @SuppressWarnings(PHPMD.ExitExpression)
      */
     private function initObjectManager()
     {
-        $params = (new ComplexParameter(self::INPUT_KEY_BOOTSTRAP))->mergeFromArgv($_SERVER, $_SERVER);
-        $params[Bootstrap::PARAM_REQUIRE_MAINTENANCE] = null;
+        try {
+            $params = (new ComplexParameter(self::INPUT_KEY_BOOTSTRAP))->mergeFromArgv($_SERVER, $_SERVER);
+            $params[Bootstrap::PARAM_REQUIRE_MAINTENANCE] = null;
 
-        $this->objectManager = Bootstrap::create(BP, $params)->getObjectManager();
+            $this->objectManager = Bootstrap::create(BP, $params)->getObjectManager();
 
-        /** @var ObjectManagerProvider $omProvider */
-        $omProvider = $this->serviceManager->get(ObjectManagerProvider::class);
-        $omProvider->setObjectManager($this->objectManager);
+            /** @var ObjectManagerProvider $omProvider */
+            $omProvider = $this->serviceManager->get(ObjectManagerProvider::class);
+            $omProvider->setObjectManager($this->objectManager);
+        } catch (FileSystemException $exception) {
+            $this->writeGenerationDirectoryReadError();
+
+            exit(static::RETURN_FAILURE);
+        }
     }
 
     /**
@@ -178,7 +182,7 @@ class Cli extends Console\Application
      *      developer - application will be terminated
      *
      * @return void
-     * @throws GenerationDirectoryAccessException If generation directory is read-only in developer mode
+     * @SuppressWarnings(PHPMD.ExitExpression)
      */
     private function assertGenerationPermissions()
     {
@@ -193,7 +197,9 @@ class Cli extends Console\Application
         if ($state->getMode() !== State::MODE_PRODUCTION
             && !$generationDirectoryAccess->check()
         ) {
-            throw new GenerationDirectoryAccessException();
+            $this->writeGenerationDirectoryReadError();
+
+            exit(static::RETURN_FAILURE);
         }
     }
 
@@ -201,7 +207,7 @@ class Cli extends Console\Application
      * Checks whether compiler is being prepared.
      *
      * @return void
-     * @throws GenerationDirectoryAccessException If generation directory is read-only
+     * @SuppressWarnings(PHPMD.ExitExpression)
      */
     private function assertCompilerPreparation()
     {
@@ -216,8 +222,31 @@ class Cli extends Console\Application
                 new File()
             );
 
-            $compilerPreparation->handleCompilerEnvironment();
+            try {
+                $compilerPreparation->handleCompilerEnvironment();
+            } catch (FileSystemException $e) {
+                $this->writeGenerationDirectoryReadError();
+
+                exit(static::RETURN_FAILURE);
+            }
         }
+    }
+
+    /**
+     * Writes read error to console.
+     *
+     * @return void
+     */
+    private function writeGenerationDirectoryReadError()
+    {
+        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+        $output->writeln(
+            '<error>'
+            . 'Command line user does not have read and write permissions on '
+            . $this->getDefaultDirectoryPath(DirectoryList::GENERATED_CODE) . ' directory. '
+            . 'Please address this issue before using Magento command line.'
+            . '</error>'
+        );
     }
 
     /**
@@ -240,5 +269,23 @@ class Cli extends Console\Application
         }
 
         return $commands;
+    }
+
+    /**
+     * Get default directory path by code
+     *
+     * @param string $code
+     * @return string
+     */
+    private function getDefaultDirectoryPath($code)
+    {
+        $config = DirectoryList::getDefaultConfig();
+        $result = '';
+
+        if (isset($config[$code][DirectoryList::PATH])) {
+            $result = $config[$code][DirectoryList::PATH];
+        }
+
+        return $result;
     }
 }

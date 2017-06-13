@@ -543,14 +543,14 @@ class Invoice extends AbstractModel implements EntityInterface, InvoiceInterface
      */
     public static function getStates()
     {
-        if (null === static::$_states) {
-            static::$_states = [
+        if (null === self::$_states) {
+            self::$_states = [
                 self::STATE_OPEN => __('Pending'),
                 self::STATE_PAID => __('Paid'),
                 self::STATE_CANCELED => __('Canceled'),
             ];
         }
-        return static::$_states;
+        return self::$_states;
     }
 
     /**
@@ -565,11 +565,11 @@ class Invoice extends AbstractModel implements EntityInterface, InvoiceInterface
             $stateId = $this->getState();
         }
 
-        if (null === static::$_states) {
-            static::getStates();
+        if (null === self::$_states) {
+            self::getStates();
         }
-        if (isset(static::$_states[$stateId])) {
-            return static::$_states[$stateId];
+        if (isset(self::$_states[$stateId])) {
+            return self::$_states[$stateId];
         }
         return __('Unknown State');
     }

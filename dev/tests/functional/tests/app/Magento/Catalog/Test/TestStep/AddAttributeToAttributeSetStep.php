@@ -71,9 +71,7 @@ class AddAttributeToAttributeSetStep implements TestStepInterface
      */
     public function run()
     {
-        $filterAttribute = [
-            'set_name' => $this->attributeSet == null ? 'Default' : $this->attributeSet->getAttributeSetName()
-        ];
+        $filterAttribute = ['set_name' => $this->attributeSet->getAttributeSetName()];
         $this->catalogProductSetIndex->open()->getGrid()->searchAndOpen($filterAttribute);
         $this->catalogProductSetEdit->getAttributeSetEditBlock()->moveAttribute($this->attribute->getData());
         $this->catalogProductSetEdit->getPageActions()->save();

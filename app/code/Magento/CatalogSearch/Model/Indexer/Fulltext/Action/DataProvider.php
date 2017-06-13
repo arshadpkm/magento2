@@ -95,11 +95,6 @@ class DataProvider
     private $metadata;
 
     /**
-     * @var array
-     */
-    private $attributeOptions = [];
-
-    /**
      * @param ResourceConnection $resource
      * @param \Magento\Catalog\Model\Product\Type $catalogProductType
      * @param \Magento\Eav\Model\Config $eavConfig
@@ -183,12 +178,22 @@ class DataProvider
     }
 
     /**
+     * Retrieve EAV Config Singleton
+     *
+     * @return \Magento\Eav\Model\Config
+     */
+    private function getEavConfig()
+    {
+        return $this->eavConfig;
+    }
+
+    /**
      * Retrieve searchable attributes
      *
      * @param string $backendType
      * @return \Magento\Eav\Model\Entity\Attribute[]
      */
-    public function getSearchableAttributes($backendType = null)
+    private function getSearchableAttributes($backendType = null)
     {
         if (null === $this->searchableAttributes) {
             $this->searchableAttributes = [];
@@ -205,7 +210,7 @@ class DataProvider
                 ['engine' => $this->engine, 'attributes' => $attributes]
             );
 
-            $entity = $this->eavConfig->getEntityType(\Magento\Catalog\Model\Product::ENTITY)->getEntity();
+            $entity = $this->getEavConfig()->getEntityType(\Magento\Catalog\Model\Product::ENTITY)->getEntity();
 
             foreach ($attributes as $attribute) {
                 $attribute->setEntity($entity);
@@ -234,7 +239,7 @@ class DataProvider
      * @param int|string $attribute
      * @return \Magento\Eav\Model\Entity\Attribute
      */
-    public function getSearchableAttribute($attribute)
+    private function getSearchableAttribute($attribute)
     {
         $attributes = $this->getSearchableAttributes();
         if (is_numeric($attribute)) {
@@ -249,7 +254,7 @@ class DataProvider
             }
         }
 
-        return $this->eavConfig->getAttribute(\Magento\Catalog\Model\Product::ENTITY, $attribute);
+        return $this->getEavConfig()->getAttribute(\Magento\Catalog\Model\Product::ENTITY, $attribute);
     }
 
     /**
@@ -482,21 +487,11 @@ class DataProvider
             && $attribute->usesSource()
             && $this->engine->allowAdvancedIndex()
         ) {
-            if (!isset($this->attributeOptions[$attributeId][$storeId])) {
-                $attribute->setStoreId($storeId);
-                $options = $attribute->getSource()->toOptionArray();
-                $this->attributeOptions[$attributeId][$storeId] = array_combine(
-                    array_column($options, 'value'),
-                    array_column($options, 'label')
-                );
-            }
+            $attribute->setStoreId($storeId);
 
-            $valueText = '';
-            if (isset($this->attributeOptions[$attributeId][$storeId][$valueId])) {
-                $valueText = $this->attributeOptions[$attributeId][$storeId][$valueId];
-            }
+            $valueText = (array) $attribute->getSource()->getIndexOptionText($valueId);
 
-            $pieces = array_filter(array_merge([$value], [$valueText]));
+            $pieces = array_filter(array_merge([$value], $valueText));
 
             $value = implode($this->separator, $pieces);
         }

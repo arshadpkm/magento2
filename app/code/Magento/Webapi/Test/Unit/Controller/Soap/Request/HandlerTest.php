@@ -104,7 +104,6 @@ class HandlerTest extends \PHPUnit_Framework_TestCase
         $this->_dataObjectConverter->expects($this->once())
             ->method('convertStdObjectToArray')
             ->will($this->returnValue(['field' => 1]));
-        $this->_methodsMapProcessorMock->method('getMethodReturnType')->willReturn('string');
         $operationName = 'soapOperation';
         $className = \Magento\Framework\DataObject::class;
         $methodName = 'testMethod';

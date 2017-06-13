@@ -4,20 +4,21 @@
  * See COPYING.txt for license details.
  */
 
+// @codingStandardsIgnoreFile
+
 namespace Magento\Framework\ObjectManager\Test\Unit\Relations;
 
 require_once __DIR__ . '/../_files/Child.php';
-
 class RuntimeTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var \Magento\Framework\ObjectManager\Relations\Runtime
      */
-    private $model;
+    protected $_model;
 
     protected function setUp()
     {
-        $this->model = new \Magento\Framework\ObjectManager\Relations\Runtime();
+        $this->_model = new \Magento\Framework\ObjectManager\Relations\Runtime();
     }
 
     /**
@@ -27,7 +28,7 @@ class RuntimeTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetParents($type, $parents)
     {
-        $this->assertEquals($parents, $this->model->getParents($type));
+        $this->assertEquals($parents, $this->_model->getParents($type));
     }
 
     public function getParentsDataProvider()
@@ -41,9 +42,21 @@ class RuntimeTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @param $entity
+     * @dataProvider nonExistentGeneratorsDataProvider
      */
-    public function testHasIfNonExists()
+    public function testHasIfNonExists($entity)
     {
-        $this->assertFalse($this->model->has(\NonexistentClass::class));
+        $this->assertFalse($this->_model->has($entity));
+    }
+
+    public function nonExistentGeneratorsDataProvider()
+    {
+        return [
+            [\Magento\Test\Module\Model\Item\Factory::class],
+            [\Magento\Test\Module\Model\Item\Proxy::class],
+            [\Magento\Test\Module\Model\Item\Interceptor::class],
+            [\Magento\Test\Module\Model\Item\Mapper::class],
+            [\Magento\Test\Module\Model\Item\SearchResults::class]
+        ];
     }
 }

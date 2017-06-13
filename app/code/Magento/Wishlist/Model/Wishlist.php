@@ -418,16 +418,8 @@ class Wishlist extends \Magento\Framework\Model\AbstractModel implements \Magent
         if ($buyRequest instanceof \Magento\Framework\DataObject) {
             $_buyRequest = $buyRequest;
         } elseif (is_string($buyRequest)) {
-            $isInvalidItemConfiguration = false;
-            try {
-                $buyRequestData = $this->serializer->unserialize($buyRequest);
-                if (!is_array($buyRequestData)) {
-                    $isInvalidItemConfiguration = true;
-                }
-            } catch (\InvalidArgumentException $exception) {
-                $isInvalidItemConfiguration = true;
-            }
-            if ($isInvalidItemConfiguration) {
+            $buyRequestData = $this->serializer->unserialize($buyRequest);
+            if (!is_array($buyRequestData)) {
                 throw new \InvalidArgumentException('Invalid wishlist item configuration.');
             }
             $_buyRequest = new \Magento\Framework\DataObject($buyRequestData);
